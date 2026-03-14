@@ -8,13 +8,15 @@ import ProductGrid from '../components/products/ProductGrid';
 export default function Search() {
   const [searchParams] = useSearchParams();
   const keyword = searchParams.get('q') ?? '';
+  return <SearchContent key={keyword} keyword={keyword} />;
+}
 
+function SearchContent({ keyword }: { keyword: string }) {
   const [results, setResults] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(!!keyword);
 
   useEffect(() => {
     if (!keyword) return;
-    setLoading(true);
     searchProducts(keyword).then((data) => {
       setResults(data);
       setLoading(false);

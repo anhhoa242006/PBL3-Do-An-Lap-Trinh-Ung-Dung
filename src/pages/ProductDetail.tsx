@@ -20,6 +20,17 @@ const MOCK_REVIEWS = [
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+
+  if (!id) {
+    navigate('/');
+    return null;
+  }
+
+  return <ProductDetailContent key={id} id={id} />;
+}
+
+function ProductDetailContent({ id }: { id: string }) {
+  const navigate = useNavigate();
   const addItem = useCartStore((s) => s.addItem);
 
   const [product, setProduct] = useState<Product | null>(null);
@@ -30,8 +41,6 @@ export default function ProductDetail() {
   const [activeTab, setActiveTab] = useState<'desc' | 'specs' | 'reviews'>('desc');
 
   useEffect(() => {
-    if (!id) return;
-    setLoading(true);
     getProductById(id).then((p) => {
       setProduct(p);
       if (p) {

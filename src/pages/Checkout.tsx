@@ -61,7 +61,7 @@ export default function Checkout() {
     return null;
   }
 
-  async function onSubmit(_data: FormData) {
+  async function onSubmit() {
     await new Promise((r) => setTimeout(r, 1000));
     setOrderNumber(generateOrderNumber());
     setShowSuccess(true);
