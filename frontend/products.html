@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sản phẩm - PhoneStore</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu-overlay" id="mobile-menu-overlay"></div>
+<nav class="mobile-menu" id="mobile-menu">
+  <div class="mobile-menu-header">
+    <div class="logo">
+      <div class="logo-icon">📱</div>
+      <div class="logo-text">Phone<span>Store</span></div>
+    </div>
+    <button class="mobile-menu-close" id="mobile-menu-close">✕</button>
+  </div>
+  <a href="index.html" class="mobile-nav-item">🏠 Trang chủ</a>
+  <a href="products.html?cat=dien-thoai" class="mobile-nav-item">📱 Điện thoại</a>
+  <a href="products.html?cat=may-tinh-bang" class="mobile-nav-item">📟 Máy tính bảng</a>
+  <a href="products.html?cat=phu-kien" class="mobile-nav-item">🎧 Phụ kiện</a>
+  <a href="products.html?cat=laptop" class="mobile-nav-item">💻 Laptop</a>
+  <a href="cart.html" class="mobile-nav-item">🛒 Giỏ hàng</a>
+</nav>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-top">
+    <div class="container">
+      <button class="mobile-menu-btn" id="mobile-menu-btn">☰</button>
+      <a href="index.html" class="logo">
+        <div class="logo-icon">📱</div>
+        <div class="logo-text">Phone<span>Store</span></div>
+      </a>
+      <form class="search-bar" id="search-form">
+        <div class="search-input-wrapper">
+          <input type="text" id="search-input" class="search-input" placeholder="Tìm điện thoại, phụ kiện...">
+          <button type="submit" class="search-btn">🔍</button>
+        </div>
+        <div class="search-dropdown" id="search-dropdown"></div>
+      </form>
+      <div class="header-actions">
+        <a href="cart.html" class="header-btn">
+          <span class="btn-icon">🛒</span>
+          <span>Giỏ hàng</span>
+          <span class="cart-badge" id="cart-badge">0</span>
+        </a>
+      </div>
+    </div>
+  </div>
+  <nav class="header-nav">
+    <div class="container">
+      <a href="products.html?cat=dien-thoai" class="nav-item">📱 Điện thoại</a>
+      <a href="products.html?cat=may-tinh-bang" class="nav-item">📟 Máy tính bảng</a>
+      <a href="products.html?cat=phu-kien" class="nav-item">🎧 Phụ kiện</a>
+      <a href="products.html?cat=laptop" class="nav-item">💻 Laptop</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+  <div class="container">
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+      <a href="index.html">Trang chủ</a>
+      <span class="breadcrumb-sep">/</span>
+      <span id="breadcrumb-current">Sản phẩm</span>
+    </div>
+
+    <div class="products-layout">
+      <!-- SIDEBAR FILTERS -->
+      <aside class="sidebar">
+        <div class="sidebar-section">
+          <div class="sidebar-title">📂 Danh mục</div>
+          <div id="category-filter"></div>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-title">🏷️ Thương hiệu</div>
+          <div id="brand-filter"></div>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-title">💰 Khoảng giá</div>
+          <div class="price-range-inputs">
+            <input type="number" id="min-price" placeholder="Từ" min="0">
+            <span class="price-range-sep">—</span>
+            <input type="number" id="max-price" placeholder="Đến" min="0">
+          </div>
+          <button class="filter-apply-btn" id="apply-price-btn">Áp dụng</button>
+        </div>
+        <div class="sidebar-section">
+          <button class="filter-apply-btn" id="reset-filter-btn" style="background:#666">
+            ↺ Xóa bộ lọc
+          </button>
+        </div>
+      </aside>
+
+      <!-- PRODUCTS AREA -->
+      <div class="products-area">
+        <div class="products-toolbar">
+          <div class="products-count" id="products-count">Đang tải...</div>
+          <select class="sort-select" id="sort-select">
+            <option value="">Mặc định</option>
+            <option value="popular">Bán chạy</option>
+            <option value="rating">Đánh giá cao</option>
+            <option value="price-asc">Giá thấp → cao</option>
+            <option value="price-desc">Giá cao → thấp</option>
+          </select>
+        </div>
+
+        <div class="product-grid" id="products-grid"></div>
+
+        <!-- Pagination -->
+        <div class="pagination" id="pagination"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-main">
+      <div class="footer-brand">
+        <div class="logo" style="margin-bottom:12px">
+          <div class="logo-icon">📱</div>
+          <div class="logo-text" style="font-size:20px">Phone<span>Store</span></div>
+        </div>
+        <p class="footer-desc">Cửa hàng điện thoại và phụ kiện chính hãng uy tín.</p>
+        <div class="footer-contact-item">📞 1800 6789 (Miễn phí)</div>
+        <div class="footer-contact-item">✉️ support@phonestore.vn</div>
+      </div>
+      <div>
+        <div class="footer-heading">Sản phẩm</div>
+        <div class="footer-links">
+          <a href="products.html?cat=dien-thoai">Điện thoại</a>
+          <a href="products.html?cat=may-tinh-bang">Máy tính bảng</a>
+          <a href="products.html?cat=phu-kien">Phụ kiện</a>
+          <a href="products.html?cat=laptop">Laptop</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-heading">Hỗ trợ</div>
+        <div class="footer-links">
+          <a href="#">Chính sách bảo hành</a>
+          <a href="#">Chính sách đổi trả</a>
+          <a href="#">Liên hệ</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="container">© 2024 PhoneStore. All rights reserved.</div>
+  </div>
+</footer>
+
+<script src="js/data.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/main.js"></script>
+<script>
+  const PER_PAGE = 12;
+  let currentPage = 1;
+  let currentFilters = {};
+
+  function getParams() {
+    const params = new URLSearchParams(window.location.search);
+    return {
+      cat: params.get('cat') || '',
+      brand: params.get('brand') || '',
+    };
+  }
+
+  function applyFilters() {
+    const sortVal = document.getElementById('sort-select').value;
+    const minPrice = document.getElementById('min-price').value;
+    const maxPrice = document.getElementById('max-price').value;
+
+    // Get checked brands
+    const checkedBrands = [...document.querySelectorAll('#brand-filter input:checked')].map(cb => cb.value);
+
+    currentFilters = {
+      brand: checkedBrands.length ? checkedBrands : undefined,
+      minPrice: minPrice ? parseInt(minPrice) : undefined,
+      maxPrice: maxPrice ? parseInt(maxPrice) : undefined,
+      sort: sortVal || undefined,
+    };
+
+    currentPage = 1;
+    renderProducts();
+  }
+
+  function renderProducts() {
+    const { cat } = getParams();
+    let result;
+
+    if (cat) {
+      result = getProductsByCategory(cat, currentFilters);
+    } else {
+      result = [...products];
+      if (currentFilters.brand && currentFilters.brand.length) {
+        result = result.filter(p => currentFilters.brand.includes(p.brand));
+      }
+      if (currentFilters.minPrice !== undefined) result = result.filter(p => p.price >= currentFilters.minPrice);
+      if (currentFilters.maxPrice !== undefined) result = result.filter(p => p.price <= currentFilters.maxPrice);
+      if (currentFilters.sort === 'price-asc') result.sort((a, b) => a.price - b.price);
+      else if (currentFilters.sort === 'price-desc') result.sort((a, b) => b.price - a.price);
+      else if (currentFilters.sort === 'popular') result.sort((a, b) => b.reviewCount - a.reviewCount);
+      else if (currentFilters.sort === 'rating') result.sort((a, b) => b.rating - a.rating);
+    }
+
+    const totalPages = Math.ceil(result.length / PER_PAGE);
+    const pageData = result.slice((currentPage - 1) * PER_PAGE, currentPage * PER_PAGE);
+
+    document.getElementById('products-count').innerHTML = `
+      Hiển thị <strong>${pageData.length}</strong> / <strong>${result.length}</strong> sản phẩm
+    `;
+
+    const grid = document.getElementById('products-grid');
+    if (!pageData.length) {
+      grid.innerHTML = `
+        <div style="grid-column:1/-1;text-align:center;padding:48px 0;">
+          <div style="font-size:64px;margin-bottom:16px;opacity:.3">😕</div>
+          <div style="font-size:18px;font-weight:700;margin-bottom:8px">Không tìm thấy sản phẩm</div>
+          <div style="font-size:14px;color:#999">Hãy thử thay đổi bộ lọc</div>
+        </div>
+      `;
+    } else {
+      grid.innerHTML = pageData.map(renderProductCard).join('');
+    }
+
+    renderPagination(totalPages);
+  }
+
+  function renderPagination(totalPages) {
+    const pag = document.getElementById('pagination');
+    if (totalPages <= 1) { pag.innerHTML = ''; return; }
+
+    let html = `<button class="page-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="goPage(${currentPage - 1})">‹</button>`;
+    for (let i = 1; i <= totalPages; i++) {
+      if (i === 1 || i === totalPages || Math.abs(i - currentPage) <= 1) {
+        html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="goPage(${i})">${i}</button>`;
+      } else if (Math.abs(i - currentPage) === 2) {
+        html += `<span style="padding:0 6px;color:#999">…</span>`;
+      }
+    }
+    html += `<button class="page-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="goPage(${currentPage + 1})">›</button>`;
+    pag.innerHTML = html;
+  }
+
+  function goPage(n) {
+    currentPage = n;
+    renderProducts();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const { cat, brand } = getParams();
+
+    // Set breadcrumb
+    const catInfo = categories.find(c => c.id === cat);
+    if (catInfo) {
+      document.getElementById('breadcrumb-current').textContent = catInfo.name;
+      document.title = `${catInfo.name} - PhoneStore`;
+    } else {
+      document.getElementById('breadcrumb-current').textContent = 'Tất cả sản phẩm';
+    }
+
+    // Render category filter
+    document.getElementById('category-filter').innerHTML = categories.map(c => `
+      <label class="filter-check-label">
+        <input type="radio" name="cat-filter" value="${c.id}" ${cat === c.id ? 'checked' : ''}
+          onchange="window.location.href='products.html?cat=${c.id}'">
+        ${c.icon} ${c.name}
+      </label>
+    `).join('');
+
+    // Get brands for current category
+    let catBrands;
+    if (cat) {
+      catBrands = [...new Set(products.filter(p => p.category === cat).map(p => p.brand))];
+    } else {
+      catBrands = brands;
+    }
+
+    // Render brand filter
+    document.getElementById('brand-filter').innerHTML = catBrands.map(b => `
+      <label class="filter-check-label">
+        <input type="checkbox" value="${b}" ${brand === b ? 'checked' : ''} onchange="applyFilters()">
+        ${b}
+      </label>
+    `).join('');
+
+    // Sort change
+    document.getElementById('sort-select').addEventListener('change', applyFilters);
+
+    // Price filter
+    document.getElementById('apply-price-btn').addEventListener('click', applyFilters);
+
+    // Reset filters
+    document.getElementById('reset-filter-btn').addEventListener('click', () => {
+      document.querySelectorAll('#brand-filter input').forEach(cb => cb.checked = false);
+      document.getElementById('min-price').value = '';
+      document.getElementById('max-price').value = '';
+      document.getElementById('sort-select').value = '';
+      currentFilters = {};
+      currentPage = 1;
+      renderProducts();
+    });
+
+    // If brand param, precheck it
+    if (brand) {
+      const cb = document.querySelector(`#brand-filter input[value="${brand}"]`);
+      if (cb) {
+        cb.checked = true;
+        currentFilters.brand = [brand];
+      }
+    }
+
+    renderProducts();
+  });
+</script>
+</body>
+</html>

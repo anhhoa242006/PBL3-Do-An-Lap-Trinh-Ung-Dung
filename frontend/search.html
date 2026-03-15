@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tìm kiếm - PhoneStore</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu-overlay" id="mobile-menu-overlay"></div>
+<nav class="mobile-menu" id="mobile-menu">
+  <div class="mobile-menu-header">
+    <div class="logo">
+      <div class="logo-icon">📱</div>
+      <div class="logo-text">Phone<span>Store</span></div>
+    </div>
+    <button class="mobile-menu-close" id="mobile-menu-close">✕</button>
+  </div>
+  <a href="index.html" class="mobile-nav-item">🏠 Trang chủ</a>
+  <a href="products.html?cat=dien-thoai" class="mobile-nav-item">📱 Điện thoại</a>
+  <a href="products.html?cat=may-tinh-bang" class="mobile-nav-item">📟 Máy tính bảng</a>
+  <a href="products.html?cat=phu-kien" class="mobile-nav-item">🎧 Phụ kiện</a>
+  <a href="cart.html" class="mobile-nav-item">🛒 Giỏ hàng</a>
+</nav>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-top">
+    <div class="container">
+      <button class="mobile-menu-btn" id="mobile-menu-btn">☰</button>
+      <a href="index.html" class="logo">
+        <div class="logo-icon">📱</div>
+        <div class="logo-text">Phone<span>Store</span></div>
+      </a>
+      <form class="search-bar" id="search-form">
+        <div class="search-input-wrapper">
+          <input type="text" id="search-input" class="search-input" placeholder="Tìm điện thoại, phụ kiện...">
+          <button type="submit" class="search-btn">🔍</button>
+        </div>
+        <div class="search-dropdown" id="search-dropdown"></div>
+      </form>
+      <div class="header-actions">
+        <a href="cart.html" class="header-btn">
+          <span class="btn-icon">🛒</span>
+          <span>Giỏ hàng</span>
+          <span class="cart-badge" id="cart-badge">0</span>
+        </a>
+      </div>
+    </div>
+  </div>
+  <nav class="header-nav">
+    <div class="container">
+      <a href="products.html?cat=dien-thoai" class="nav-item">📱 Điện thoại</a>
+      <a href="products.html?cat=may-tinh-bang" class="nav-item">📟 Máy tính bảng</a>
+      <a href="products.html?cat=phu-kien" class="nav-item">🎧 Phụ kiện</a>
+      <a href="products.html?cat=laptop" class="nav-item">💻 Laptop</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+  <div class="container" style="padding-top:8px; padding-bottom:40px">
+    <div class="breadcrumb">
+      <a href="index.html">Trang chủ</a>
+      <span class="breadcrumb-sep">/</span>
+      <span>Tìm kiếm</span>
+    </div>
+
+    <div class="search-results-header">
+      <div class="search-results-title">
+        Kết quả tìm kiếm: "<span class="search-results-keyword" id="keyword-display"></span>"
+      </div>
+      <div class="search-results-count" id="results-count"></div>
+    </div>
+
+    <div id="search-results-grid"></div>
+  </div>
+</main>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-main">
+      <div class="footer-brand">
+        <div class="logo" style="margin-bottom:12px">
+          <div class="logo-icon">📱</div>
+          <div class="logo-text" style="font-size:20px">Phone<span>Store</span></div>
+        </div>
+        <p class="footer-desc">Cửa hàng điện thoại và phụ kiện chính hãng uy tín.</p>
+        <div class="footer-contact-item">📞 1800 6789</div>
+      </div>
+      <div>
+        <div class="footer-heading">Sản phẩm</div>
+        <div class="footer-links">
+          <a href="products.html?cat=dien-thoai">Điện thoại</a>
+          <a href="products.html?cat=may-tinh-bang">Máy tính bảng</a>
+          <a href="products.html?cat=phu-kien">Phụ kiện</a>
+          <a href="products.html?cat=laptop">Laptop</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="container">© 2024 PhoneStore. All rights reserved.</div>
+  </div>
+</footer>
+
+<script src="js/data.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/main.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search);
+    const keyword = params.get('q') || '';
+
+    document.title = `Tìm kiếm "${keyword}" - PhoneStore`;
+    document.getElementById('keyword-display').textContent = keyword;
+
+    // Pre-fill search box
+    if (keyword) {
+      document.getElementById('search-input').value = keyword;
+    }
+
+    if (!keyword.trim()) {
+      document.getElementById('results-count').textContent = 'Vui lòng nhập từ khóa tìm kiếm.';
+      document.getElementById('search-results-grid').innerHTML = `
+        <div class="search-no-results">
+          <div class="search-no-results-icon">🔍</div>
+          <h3 style="font-size:18px;font-weight:700;margin-bottom:8px">Nhập từ khóa để tìm kiếm</h3>
+          <p style="color:#999">Gõ tên điện thoại, thương hiệu hoặc phụ kiện vào ô tìm kiếm</p>
+        </div>
+      `;
+      return;
+    }
+
+    const results = searchProducts(keyword);
+    document.getElementById('results-count').textContent = `Tìm thấy ${results.length} sản phẩm`;
+
+    if (!results.length) {
+      document.getElementById('search-results-grid').innerHTML = `
+        <div class="search-no-results">
+          <div class="search-no-results-icon">😕</div>
+          <h3 style="font-size:18px;font-weight:700;margin-bottom:8px">Không tìm thấy kết quả</h3>
+          <p style="color:#999;margin-bottom:16px">Không có sản phẩm nào khớp với "<strong>${keyword}</strong>"</p>
+          <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+            <a href="products.html" class="btn btn-primary">Xem tất cả sản phẩm</a>
+            <a href="index.html" class="btn btn-secondary">Về trang chủ</a>
+          </div>
+          <div style="margin-top:24px;font-size:14px;color:#666">
+            <p>Gợi ý: Thử tìm với từ khóa ngắn hơn hoặc kiểm tra lỗi chính tả</p>
+          </div>
+        </div>
+      `;
+    } else {
+      const grid = document.createElement('div');
+      grid.className = 'product-grid';
+      grid.innerHTML = results.map(renderProductCard).join('');
+      document.getElementById('search-results-grid').appendChild(grid);
+    }
+  });
+</script>
+</body>
+</html>

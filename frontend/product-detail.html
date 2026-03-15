@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chi tiết sản phẩm - PhoneStore</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu-overlay" id="mobile-menu-overlay"></div>
+<nav class="mobile-menu" id="mobile-menu">
+  <div class="mobile-menu-header">
+    <div class="logo">
+      <div class="logo-icon">📱</div>
+      <div class="logo-text">Phone<span>Store</span></div>
+    </div>
+    <button class="mobile-menu-close" id="mobile-menu-close">✕</button>
+  </div>
+  <a href="index.html" class="mobile-nav-item">🏠 Trang chủ</a>
+  <a href="products.html?cat=dien-thoai" class="mobile-nav-item">📱 Điện thoại</a>
+  <a href="products.html?cat=may-tinh-bang" class="mobile-nav-item">📟 Máy tính bảng</a>
+  <a href="products.html?cat=phu-kien" class="mobile-nav-item">🎧 Phụ kiện</a>
+  <a href="products.html?cat=laptop" class="mobile-nav-item">💻 Laptop</a>
+  <a href="cart.html" class="mobile-nav-item">🛒 Giỏ hàng</a>
+</nav>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-top">
+    <div class="container">
+      <button class="mobile-menu-btn" id="mobile-menu-btn">☰</button>
+      <a href="index.html" class="logo">
+        <div class="logo-icon">📱</div>
+        <div class="logo-text">Phone<span>Store</span></div>
+      </a>
+      <form class="search-bar" id="search-form">
+        <div class="search-input-wrapper">
+          <input type="text" id="search-input" class="search-input" placeholder="Tìm điện thoại, phụ kiện...">
+          <button type="submit" class="search-btn">🔍</button>
+        </div>
+        <div class="search-dropdown" id="search-dropdown"></div>
+      </form>
+      <div class="header-actions">
+        <a href="cart.html" class="header-btn">
+          <span class="btn-icon">🛒</span>
+          <span>Giỏ hàng</span>
+          <span class="cart-badge" id="cart-badge">0</span>
+        </a>
+      </div>
+    </div>
+  </div>
+  <nav class="header-nav">
+    <div class="container">
+      <a href="products.html?cat=dien-thoai" class="nav-item">📱 Điện thoại</a>
+      <a href="products.html?cat=may-tinh-bang" class="nav-item">📟 Máy tính bảng</a>
+      <a href="products.html?cat=phu-kien" class="nav-item">🎧 Phụ kiện</a>
+      <a href="products.html?cat=laptop" class="nav-item">💻 Laptop</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="index.html">Trang chủ</a>
+      <span class="breadcrumb-sep">/</span>
+      <a href="products.html" id="breadcrumb-cat">Sản phẩm</a>
+      <span class="breadcrumb-sep">/</span>
+      <span id="breadcrumb-name">Chi tiết</span>
+    </div>
+
+    <div id="product-not-found" class="hidden" style="text-align:center;padding:80px 0">
+      <div style="font-size:80px;margin-bottom:16px">😕</div>
+      <h2 style="font-size:24px;margin-bottom:8px">Không tìm thấy sản phẩm</h2>
+      <p style="color:#999;margin-bottom:24px">Sản phẩm này không tồn tại hoặc đã bị xóa.</p>
+      <a href="products.html" class="btn btn-primary">← Về trang sản phẩm</a>
+    </div>
+
+    <div id="product-detail-content">
+      <!-- Product Detail -->
+      <div class="product-detail-grid">
+        <!-- Gallery -->
+        <div class="product-gallery">
+          <div class="gallery-main">
+            <img id="gallery-main-img" src="" alt="">
+          </div>
+          <div class="gallery-thumbs" id="gallery-thumbs"></div>
+        </div>
+
+        <!-- Info -->
+        <div class="product-info">
+          <div class="product-detail-brand" id="detail-brand"></div>
+          <h1 class="product-detail-name" id="detail-name"></h1>
+
+          <div class="product-detail-rating">
+            <span class="stars" id="detail-stars"></span>
+            <span class="rating-value" id="detail-rating"></span>
+            <span class="rating-divider">|</span>
+            <span id="detail-reviews" style="font-size:13px;color:#666"></span>
+          </div>
+
+          <div class="product-detail-pricing">
+            <div class="product-detail-price" id="detail-price"></div>
+            <div>
+              <span class="product-detail-original" id="detail-original-price"></span>
+              <span class="product-detail-discount" id="detail-discount"></span>
+            </div>
+            <div class="product-detail-saving" id="detail-saving"></div>
+          </div>
+
+          <!-- Color Variant -->
+          <div class="variant-section" id="color-section">
+            <div class="variant-label">Màu sắc: <strong id="selected-color"></strong></div>
+            <div class="variant-options" id="color-options"></div>
+          </div>
+
+          <!-- Storage Variant -->
+          <div class="variant-section" id="storage-section">
+            <div class="variant-label">Dung lượng: <strong id="selected-storage"></strong></div>
+            <div class="variant-options" id="storage-options"></div>
+          </div>
+
+          <!-- Quantity -->
+          <div class="quantity-section">
+            <div class="quantity-label">Số lượng:</div>
+            <div class="quantity-control">
+              <button class="qty-btn" id="qty-minus">−</button>
+              <input type="number" class="qty-input" id="qty-input" value="1" min="1" max="99">
+              <button class="qty-btn" id="qty-plus">+</button>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="action-buttons">
+            <button class="btn btn-primary btn-lg" id="add-to-cart-btn">
+              🛒 Thêm vào giỏ hàng
+            </button>
+            <button class="btn btn-outline btn-lg" id="buy-now-btn">
+              ⚡ Mua ngay
+            </button>
+          </div>
+
+          <!-- Features -->
+          <div class="product-features">
+            <div class="feature-item">
+              <span class="feature-icon">🔧</span>
+              <span>Bảo hành chính hãng <strong>12 tháng</strong></span>
+            </div>
+            <div class="feature-item">
+              <span class="feature-icon">🔄</span>
+              <span>Đổi trả trong <strong>30 ngày</strong> nếu lỗi nhà sản xuất</span>
+            </div>
+            <div class="feature-item">
+              <span class="feature-icon">🚚</span>
+              <span>Giao hàng <strong>miễn phí</strong> toàn quốc</span>
+            </div>
+            <div class="feature-item">
+              <span class="feature-icon">🎁</span>
+              <span>Tặng <strong>ốp lưng + cường lực</strong> khi mua máy</span>
+            </div>
+            <div class="feature-item">
+              <span class="feature-icon">💳</span>
+              <span>Trả góp <strong>0%</strong> qua thẻ tín dụng</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabs: Specs + Description + Reviews -->
+      <div class="tabs">
+        <div class="tab-list">
+          <button class="tab-btn active" data-tab="tab-specs">📋 Thông số kỹ thuật</button>
+          <button class="tab-btn" data-tab="tab-desc">📄 Mô tả sản phẩm</button>
+          <button class="tab-btn" data-tab="tab-reviews">⭐ Đánh giá (<span id="review-count-tab">0</span>)</button>
+        </div>
+
+        <div class="tab-panel active" id="tab-specs">
+          <table class="specs-table" id="specs-table"></table>
+        </div>
+
+        <div class="tab-panel" id="tab-desc">
+          <div id="product-description" style="font-size:15px;line-height:1.8;color:#444"></div>
+        </div>
+
+        <div class="tab-panel" id="tab-reviews">
+          <div class="review-summary">
+            <div class="review-overall">
+              <div class="review-score" id="review-score"></div>
+              <div class="review-stars" id="review-stars-big"></div>
+              <div class="review-count-total" id="review-total"></div>
+            </div>
+            <div class="review-bars" id="review-bars"></div>
+          </div>
+          <div id="reviews-list"></div>
+        </div>
+      </div>
+
+      <!-- Related Products -->
+      <section class="section" style="margin-top:32px">
+        <div class="section-header">
+          <h2 class="section-title">Sản phẩm liên quan</h2>
+        </div>
+        <div class="product-grid" id="related-grid"></div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-main">
+      <div class="footer-brand">
+        <div class="logo" style="margin-bottom:12px">
+          <div class="logo-icon">📱</div>
+          <div class="logo-text" style="font-size:20px">Phone<span>Store</span></div>
+        </div>
+        <p class="footer-desc">Cửa hàng điện thoại và phụ kiện chính hãng uy tín.</p>
+        <div class="footer-contact-item">📞 1800 6789</div>
+        <div class="footer-contact-item">✉️ support@phonestore.vn</div>
+      </div>
+      <div>
+        <div class="footer-heading">Sản phẩm</div>
+        <div class="footer-links">
+          <a href="products.html?cat=dien-thoai">Điện thoại</a>
+          <a href="products.html?cat=may-tinh-bang">Máy tính bảng</a>
+          <a href="products.html?cat=phu-kien">Phụ kiện</a>
+          <a href="products.html?cat=laptop">Laptop</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-heading">Hỗ trợ</div>
+        <div class="footer-links">
+          <a href="#">Bảo hành</a>
+          <a href="#">Đổi trả</a>
+          <a href="#">Liên hệ</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="container">© 2024 PhoneStore. All rights reserved.</div>
+  </div>
+</footer>
+
+<script src="js/data.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/main.js"></script>
+<script>
+  let currentProduct = null;
+  let selectedVariant = null;
+
+  function getProductId() {
+    return new URLSearchParams(window.location.search).get('id');
+  }
+
+  function selectVariant(variant) {
+    selectedVariant = variant;
+    document.getElementById('selected-color').textContent = variant.color || '—';
+    document.getElementById('selected-storage').textContent = variant.storage || '—';
+
+    // Update price
+    if (variant.price) {
+      document.getElementById('detail-price').textContent = formatPrice(variant.price);
+      const saved = currentProduct.originalPrice - variant.price;
+      if (saved > 0) {
+        document.getElementById('detail-saving').textContent = `Tiết kiệm ${formatPrice(saved)}`;
+      }
+    }
+
+    // Highlight active buttons
+    document.querySelectorAll('.color-variant-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.color === variant.color);
+    });
+    document.querySelectorAll('.storage-variant-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.storage === variant.storage);
+    });
+  }
+
+  function renderMockReviews(product) {
+    const mockReviews = [
+      { name: 'Nguyễn Văn A', rating: 5, date: '15/12/2024', text: 'Sản phẩm rất tốt, đúng như mô tả. Giao hàng nhanh, đóng gói cẩn thận. Rất hài lòng với chất lượng!' },
+      { name: 'Trần Thị B', rating: 5, date: '10/12/2024', text: 'Mình rất thích chiếc điện thoại này. Camera chụp ảnh đẹp, pin trâu, hiệu năng mượt mà. Xứng đáng với giá tiền.' },
+      { name: 'Lê Minh C', rating: 4, date: '05/12/2024', text: 'Hàng chính hãng, hoạt động tốt. Thiết kế đẹp mắt. Chỉ tiếc là giá hơi cao nhưng bù lại chất lượng xứng đáng.' },
+      { name: 'Phạm Thị D', rating: 5, date: '01/12/2024', text: 'Đây là lần thứ 3 mình mua hàng ở đây. Luôn hài lòng với chất lượng sản phẩm và dịch vụ hỗ trợ!' },
+    ];
+
+    const bars = [5, 4, 3, 2, 1];
+    const barPercentages = [65, 20, 10, 3, 2];
+
+    document.getElementById('review-score').textContent = product.rating.toFixed(1);
+    document.getElementById('review-stars-big').textContent = renderStars(product.rating);
+    document.getElementById('review-total').textContent = `${product.reviewCount.toLocaleString('vi-VN')} đánh giá`;
+    document.getElementById('review-count-tab').textContent = product.reviewCount.toLocaleString('vi-VN');
+
+    document.getElementById('review-bars').innerHTML = bars.map((star, i) => `
+      <div class="review-bar-row">
+        <div class="review-bar-label">${star} ★</div>
+        <div class="review-bar-track">
+          <div class="review-bar-fill" style="width:${barPercentages[i]}%"></div>
+        </div>
+        <div style="font-size:12px;color:#999;width:32px">${barPercentages[i]}%</div>
+      </div>
+    `).join('');
+
+    document.getElementById('reviews-list').innerHTML = mockReviews.map(r => `
+      <div class="review-card">
+        <div class="review-header">
+          <div class="reviewer-avatar">${r.name[0]}</div>
+          <div>
+            <div class="reviewer-name">${r.name}</div>
+            <div class="reviewer-date">${r.date}</div>
+          </div>
+          <div style="margin-left:auto;color:#f39c12;font-size:14px">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
+        </div>
+        <div class="review-text">${r.text}</div>
+      </div>
+    `).join('');
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const id = getProductId();
+    const product = getProductById(id);
+
+    if (!product) {
+      document.getElementById('product-detail-content').classList.add('hidden');
+      document.getElementById('product-not-found').classList.remove('hidden');
+      return;
+    }
+
+    currentProduct = product;
+
+    // Update page title
+    document.title = `${product.name} - PhoneStore`;
+
+    // Breadcrumb
+    const catInfo = categories.find(c => c.id === product.category);
+    if (catInfo) {
+      document.getElementById('breadcrumb-cat').href = `products.html?cat=${product.category}`;
+      document.getElementById('breadcrumb-cat').textContent = catInfo.name;
+    }
+    document.getElementById('breadcrumb-name').textContent = product.name;
+
+    // Gallery
+    const mainImg = document.getElementById('gallery-main-img');
+    mainImg.src = product.images[0] || product.image;
+    mainImg.alt = product.name;
+
+    const thumbsContainer = document.getElementById('gallery-thumbs');
+    thumbsContainer.innerHTML = product.images.map((img, i) => `
+      <div class="gallery-thumb ${i === 0 ? 'active' : ''}" onclick="switchMainImg(this, '${img}')">
+        <img src="${img}" alt="${product.name} ảnh ${i+1}" loading="lazy">
+      </div>
+    `).join('');
+
+    // Product info
+    document.getElementById('detail-brand').textContent = product.brand;
+    document.getElementById('detail-name').textContent = product.name;
+    document.getElementById('detail-stars').textContent = renderStars(product.rating);
+    document.getElementById('detail-rating').textContent = product.rating.toFixed(1);
+    document.getElementById('detail-reviews').textContent = `${product.reviewCount.toLocaleString('vi-VN')} đánh giá`;
+
+    document.getElementById('detail-price').textContent = formatPrice(product.price);
+    if (product.originalPrice > product.price) {
+      document.getElementById('detail-original-price').textContent = formatPrice(product.originalPrice);
+      document.getElementById('detail-discount').textContent = `-${product.discount}%`;
+      document.getElementById('detail-saving').textContent = `Tiết kiệm ${formatPrice(product.originalPrice - product.price)}`;
+    }
+
+    // Variants
+    const colors = [...new Set(product.variants.map(v => v.color).filter(Boolean))];
+    const storages = [...new Set(product.variants.map(v => v.storage).filter(Boolean))];
+
+    if (colors.length) {
+      document.getElementById('color-options').innerHTML = colors.map(c => `
+        <button class="variant-btn color-variant-btn ${c === colors[0] ? 'active' : ''}"
+          data-color="${c}" onclick="onColorSelect('${c}')">
+          ${c}
+        </button>
+      `).join('');
+      document.getElementById('selected-color').textContent = colors[0];
+    } else {
+      document.getElementById('color-section').style.display = 'none';
+    }
+
+    if (storages.length) {
+      document.getElementById('storage-options').innerHTML = storages.map(s => `
+        <button class="variant-btn storage-variant-btn ${s === storages[0] ? 'active' : ''}"
+          data-storage="${s}" onclick="onStorageSelect('${s}')">
+          ${s}
+        </button>
+      `).join('');
+      document.getElementById('selected-storage').textContent = storages[0];
+    } else {
+      document.getElementById('storage-section').style.display = 'none';
+    }
+
+    // Set default variant
+    selectedVariant = product.variants[0] || { color: colors[0] || '', storage: storages[0] || '', price: product.price };
+
+    // Quantity
+    const qtyInput = document.getElementById('qty-input');
+    document.getElementById('qty-minus').addEventListener('click', () => {
+      if (parseInt(qtyInput.value) > 1) qtyInput.value = parseInt(qtyInput.value) - 1;
+    });
+    document.getElementById('qty-plus').addEventListener('click', () => {
+      if (parseInt(qtyInput.value) < 99) qtyInput.value = parseInt(qtyInput.value) + 1;
+    });
+
+    // Add to cart
+    document.getElementById('add-to-cart-btn').addEventListener('click', () => {
+      const qty = parseInt(qtyInput.value) || 1;
+      Cart.addItem(product, selectedVariant, qty);
+    });
+
+    // Buy now
+    document.getElementById('buy-now-btn').addEventListener('click', () => {
+      const qty = parseInt(qtyInput.value) || 1;
+      Cart.addItem(product, selectedVariant, qty);
+      window.location.href = 'cart.html';
+    });
+
+    // Specs table
+    document.getElementById('specs-table').innerHTML = Object.entries(product.specs).map(([key, val]) => `
+      <tr><td>${key}</td><td>${val}</td></tr>
+    `).join('');
+
+    // Description
+    document.getElementById('product-description').innerHTML = `
+      <p>${product.description}</p>
+      <br>
+      <p>Sản phẩm được bán chính hãng tại PhoneStore với đầy đủ hộp, phụ kiện, và tem bảo hành. 
+      Hàng mới 100%, bảo hành 12 tháng tại trung tâm bảo hành ủy quyền.</p>
+    `;
+
+    // Reviews
+    renderMockReviews(product);
+
+    // Related products
+    const related = getRelatedProducts(product);
+    document.getElementById('related-grid').innerHTML = related.map(renderProductCard).join('');
+  });
+
+  function switchMainImg(thumbEl, imgSrc) {
+    document.querySelectorAll('.gallery-thumb').forEach(t => t.classList.remove('active'));
+    thumbEl.classList.add('active');
+    document.getElementById('gallery-main-img').src = imgSrc;
+  }
+
+  function onColorSelect(color) {
+    const storageSelected = document.querySelector('.storage-variant-btn.active')?.dataset.storage || '';
+    const variant = currentProduct.variants.find(v => v.color === color && (!storageSelected || v.storage === storageSelected))
+      || currentProduct.variants.find(v => v.color === color)
+      || currentProduct.variants[0];
+    selectVariant(variant);
+  }
+
+  function onStorageSelect(storage) {
+    const colorSelected = document.querySelector('.color-variant-btn.active')?.dataset.color || '';
+    const variant = currentProduct.variants.find(v => v.storage === storage && (!colorSelected || v.color === colorSelected))
+      || currentProduct.variants.find(v => v.storage === storage)
+      || currentProduct.variants[0];
+    selectVariant(variant);
+  }
+</script>
+</body>
+</html>
