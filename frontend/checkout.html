@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thanh toán - PhoneStore</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu-overlay" id="mobile-menu-overlay"></div>
+<nav class="mobile-menu" id="mobile-menu">
+  <div class="mobile-menu-header">
+    <div class="logo">
+      <div class="logo-icon">📱</div>
+      <div class="logo-text">Phone<span>Store</span></div>
+    </div>
+    <button class="mobile-menu-close" id="mobile-menu-close">✕</button>
+  </div>
+  <a href="index.html" class="mobile-nav-item">🏠 Trang chủ</a>
+  <a href="products.html" class="mobile-nav-item">🛍️ Sản phẩm</a>
+  <a href="cart.html" class="mobile-nav-item">🛒 Giỏ hàng</a>
+</nav>
+
+<!-- HEADER (simplified) -->
+<header class="header">
+  <div class="header-top">
+    <div class="container">
+      <button class="mobile-menu-btn" id="mobile-menu-btn">☰</button>
+      <a href="index.html" class="logo">
+        <div class="logo-icon">📱</div>
+        <div class="logo-text">Phone<span>Store</span></div>
+      </a>
+      <div style="flex:1"></div>
+      <div style="color:#fff;font-size:13px;display:flex;align-items:center;gap:8px">
+        <span style="opacity:.7">Bảo mật</span>
+        <span style="font-size:20px">🔒</span>
+        <span style="opacity:.7">Thanh toán an toàn</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="index.html">Trang chủ</a>
+      <span class="breadcrumb-sep">/</span>
+      <a href="cart.html">Giỏ hàng</a>
+      <span class="breadcrumb-sep">/</span>
+      <span>Thanh toán</span>
+    </div>
+
+    <div class="checkout-layout">
+      <!-- Left: Form -->
+      <div>
+        <!-- Step 1: Customer Info -->
+        <div class="checkout-form-card">
+          <div class="checkout-section-title">
+            <span class="checkout-section-num">1</span>
+            Thông tin giao hàng
+          </div>
+          <form id="checkout-form">
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Họ và tên <span class="required">*</span></label>
+                <input type="text" class="form-input" id="full-name" placeholder="Nguyễn Văn A" required>
+                <span class="form-error" id="err-name">Vui lòng nhập họ tên</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Số điện thoại <span class="required">*</span></label>
+                <input type="tel" class="form-input" id="phone" placeholder="0912 345 678" required>
+                <span class="form-error" id="err-phone">Số điện thoại không hợp lệ</span>
+              </div>
+              <div class="form-group full">
+                <label class="form-label">Email</label>
+                <input type="email" class="form-input" id="email" placeholder="email@example.com">
+                <span class="form-error" id="err-email">Email không hợp lệ</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Tỉnh / Thành phố <span class="required">*</span></label>
+                <select class="form-select" id="province" required>
+                  <option value="">Chọn tỉnh/thành</option>
+                  <option value="hn">Hà Nội</option>
+                  <option value="hcm">TP. Hồ Chí Minh</option>
+                  <option value="dn">Đà Nẵng</option>
+                  <option value="hp">Hải Phòng</option>
+                  <option value="ct">Cần Thơ</option>
+                  <option value="hue">Thừa Thiên Huế</option>
+                  <option value="bd">Bình Dương</option>
+                  <option value="bn">Bắc Ninh</option>
+                </select>
+                <span class="form-error" id="err-province">Vui lòng chọn tỉnh/thành phố</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Quận / Huyện <span class="required">*</span></label>
+                <input type="text" class="form-input" id="district" placeholder="Quận/Huyện" required>
+                <span class="form-error" id="err-district">Vui lòng nhập quận/huyện</span>
+              </div>
+              <div class="form-group full">
+                <label class="form-label">Địa chỉ cụ thể <span class="required">*</span></label>
+                <input type="text" class="form-input" id="address" placeholder="Số nhà, tên đường, phường/xã" required>
+                <span class="form-error" id="err-address">Vui lòng nhập địa chỉ</span>
+              </div>
+              <div class="form-group full">
+                <label class="form-label">Ghi chú đơn hàng</label>
+                <textarea class="form-textarea" id="notes" placeholder="Ghi chú cho đơn hàng (tùy chọn)"></textarea>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <!-- Step 2: Payment Method -->
+        <div class="checkout-form-card">
+          <div class="checkout-section-title">
+            <span class="checkout-section-num">2</span>
+            Phương thức thanh toán
+          </div>
+          <div class="payment-options" id="payment-options">
+            <label class="payment-option selected" onclick="selectPayment('cod', this)">
+              <input type="radio" name="payment" value="cod" class="payment-radio" checked>
+              <span class="payment-icon">💵</span>
+              <div>
+                <div class="payment-name">Thanh toán khi nhận hàng (COD)</div>
+                <div class="payment-desc">Trả tiền mặt khi nhận hàng tận nơi</div>
+              </div>
+            </label>
+            <label class="payment-option" onclick="selectPayment('bank', this)">
+              <input type="radio" name="payment" value="bank" class="payment-radio">
+              <span class="payment-icon">🏦</span>
+              <div>
+                <div class="payment-name">Chuyển khoản ngân hàng</div>
+                <div class="payment-desc">Chuyển khoản qua tài khoản ngân hàng</div>
+              </div>
+            </label>
+            <label class="payment-option" onclick="selectPayment('momo', this)">
+              <input type="radio" name="payment" value="momo" class="payment-radio">
+              <span class="payment-icon">📱</span>
+              <div>
+                <div class="payment-name">Ví MoMo</div>
+                <div class="payment-desc">Thanh toán qua ví điện tử MoMo</div>
+              </div>
+            </label>
+            <label class="payment-option" onclick="selectPayment('card', this)">
+              <input type="radio" name="payment" value="card" class="payment-radio">
+              <span class="payment-icon">💳</span>
+              <div>
+                <div class="payment-name">Thẻ tín dụng / Ghi nợ</div>
+                <div class="payment-desc">Visa, MasterCard, JCB, American Express</div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <button class="btn btn-primary btn-full btn-lg" id="place-order-btn">
+          ✅ Đặt hàng ngay
+        </button>
+        <p style="text-align:center;font-size:12px;color:#999;margin-top:12px">
+          🔒 Thông tin của bạn được bảo mật an toàn. Bằng cách đặt hàng, bạn đồng ý với
+          <a href="#" style="color:var(--primary)">điều khoản sử dụng</a>.
+        </p>
+      </div>
+
+      <!-- Right: Order Summary -->
+      <div>
+        <div class="order-summary">
+          <div class="order-summary-title">🛒 Đơn hàng của bạn</div>
+
+          <div id="checkout-order-items"></div>
+
+          <div style="margin-top:16px; border-top:1px solid #eee; padding-top:16px">
+            <div class="order-summary-row">
+              <span>Tạm tính</span>
+              <span id="co-subtotal">0₫</span>
+            </div>
+            <div class="order-summary-row">
+              <span>Giảm giá</span>
+              <span class="discount-amount" id="co-discount">-0₫</span>
+            </div>
+            <div class="order-summary-row">
+              <span>Vận chuyển</span>
+              <span style="color:var(--success);font-weight:600">Miễn phí</span>
+            </div>
+            <div class="order-summary-row total">
+              <span>Tổng thanh toán</span>
+              <span id="co-total">0₫</span>
+            </div>
+          </div>
+
+          <div style="margin-top:16px;background:#f0fff4;border:1px solid #a8d5b5;border-radius:8px;padding:12px;font-size:13px;color:#2d7a4f">
+            🎁 <strong>Miễn phí vận chuyển</strong> cho đơn hàng từ 500.000₫
+          </div>
+        </div>
+
+        <div class="order-summary" style="margin-top:12px">
+          <div style="font-size:14px;font-weight:700;margin-bottom:12px">🔒 Cam kết của PhoneStore</div>
+          <div style="font-size:13px;color:#555;display:flex;flex-direction:column;gap:8px">
+            <div>✅ Sản phẩm chính hãng 100%</div>
+            <div>✅ Bảo hành 12 tháng</div>
+            <div>✅ Đổi trả miễn phí trong 30 ngày</div>
+            <div>✅ Giao hàng toàn quốc</div>
+            <div>✅ Hỗ trợ 24/7</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- SUCCESS MODAL -->
+<div class="modal-overlay" id="success-modal">
+  <div class="modal">
+    <div class="modal-success-icon">✅</div>
+    <h2 class="modal-title">Đặt hàng thành công!</h2>
+    <p class="modal-desc">
+      Cảm ơn bạn đã tin tưởng PhoneStore! Đơn hàng của bạn đã được ghi nhận và sẽ được xử lý trong thời gian sớm nhất.
+    </p>
+    <div class="modal-order-num" id="modal-order-num">Mã đơn hàng: #PS000001</div>
+    <div class="modal-actions">
+      <a href="index.html" class="btn btn-secondary">Về trang chủ</a>
+      <a href="products.html" class="btn btn-primary">Tiếp tục mua sắm</a>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer" style="margin-top:40px">
+  <div class="footer-bottom">
+    <div class="container">© 2024 PhoneStore. All rights reserved.</div>
+  </div>
+</footer>
+
+<script src="js/data.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/main.js"></script>
+<script>
+  function selectPayment(method, el) {
+    document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+  }
+
+  function renderCheckoutSummary() {
+    const items = Cart.getItems();
+    const total = Cart.getTotalPrice();
+    const discount = Cart.getTotalDiscount();
+    const original = total + discount;
+
+    document.getElementById('checkout-order-items').innerHTML = items.map(item => `
+      <div class="checkout-order-item">
+        <img src="${item.image}" class="checkout-order-img" alt="${item.name}" loading="lazy">
+        <div style="flex:1">
+          <div class="checkout-order-name">${item.name}</div>
+          <div class="checkout-order-qty">
+            ${item.color ? item.color : ''}${item.storage ? ' · ' + item.storage : ''} × ${item.quantity}
+          </div>
+        </div>
+        <div class="checkout-order-price">${formatPrice(item.price * item.quantity)}</div>
+      </div>
+    `).join('') || '<div style="color:#999;text-align:center;padding:16px">Giỏ hàng trống</div>';
+
+    document.getElementById('co-subtotal').textContent = formatPrice(original);
+    document.getElementById('co-discount').textContent = `-${formatPrice(discount)}`;
+    document.getElementById('co-total').textContent = formatPrice(total);
+  }
+
+  function validateForm() {
+    let valid = true;
+
+    const fields = [
+      { id: 'full-name', errId: 'err-name', test: v => v.length >= 2 },
+      { id: 'phone', errId: 'err-phone', test: v => /^(0|\+84)[0-9]{9,10}$/.test(v.replace(/\s/g,'')) },
+      { id: 'province', errId: 'err-province', test: v => v !== '' },
+      { id: 'district', errId: 'err-district', test: v => v.length >= 2 },
+      { id: 'address', errId: 'err-address', test: v => v.length >= 5 },
+    ];
+
+    const emailVal = document.getElementById('email').value.trim();
+    if (emailVal && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
+      document.getElementById('email').classList.add('error');
+      document.getElementById('err-email').classList.add('show');
+      valid = false;
+    } else {
+      document.getElementById('email').classList.remove('error');
+      document.getElementById('err-email').classList.remove('show');
+    }
+
+    fields.forEach(f => {
+      const el = document.getElementById(f.id);
+      const errEl = document.getElementById(f.errId);
+      const val = el.value.trim();
+      if (!f.test(val)) {
+        el.classList.add('error');
+        errEl.classList.add('show');
+        valid = false;
+      } else {
+        el.classList.remove('error');
+        errEl.classList.remove('show');
+      }
+    });
+
+    return valid;
+  }
+
+  document.getElementById('place-order-btn').addEventListener('click', () => {
+    if (!validateForm()) {
+      document.querySelector('.form-input.error, .form-select.error')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    if (!Cart.getItems().length) {
+      Cart.showToast('Giỏ hàng của bạn đang trống!', 'error');
+      return;
+    }
+
+    // Generate order number
+    const orderNum = `PS${Date.now().toString().slice(-6)}`;
+    document.getElementById('modal-order-num').textContent = `Mã đơn hàng: #${orderNum}`;
+
+    // Clear cart
+    Cart.clearCart();
+
+    // Show success modal
+    document.getElementById('success-modal').classList.add('open');
+  });
+
+  document.addEventListener('DOMContentLoaded', renderCheckoutSummary);
+</script>
+</body>
+</html>

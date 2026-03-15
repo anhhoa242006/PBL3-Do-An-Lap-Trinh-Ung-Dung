@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PhoneStore - Cửa hàng Điện thoại & Phụ kiện</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📱</text></svg>" />
+</head>
+<body>
+
+<!-- ========== MOBILE MENU ========== -->
+<div class="mobile-menu-overlay" id="mobile-menu-overlay"></div>
+<nav class="mobile-menu" id="mobile-menu">
+  <div class="mobile-menu-header">
+    <div class="logo">
+      <div class="logo-icon">📱</div>
+      <div class="logo-text">Phone<span>Store</span></div>
+    </div>
+    <button class="mobile-menu-close" id="mobile-menu-close">✕</button>
+  </div>
+  <a href="index.html" class="mobile-nav-item">🏠 Trang chủ</a>
+  <a href="products.html?cat=dien-thoai" class="mobile-nav-item">📱 Điện thoại</a>
+  <a href="products.html?cat=may-tinh-bang" class="mobile-nav-item">📟 Máy tính bảng</a>
+  <a href="products.html?cat=phu-kien" class="mobile-nav-item">🎧 Phụ kiện</a>
+  <a href="products.html?cat=laptop" class="mobile-nav-item">💻 Laptop</a>
+  <a href="cart.html" class="mobile-nav-item">🛒 Giỏ hàng</a>
+</nav>
+
+<!-- ========== HEADER ========== -->
+<header class="header">
+  <div class="header-top">
+    <div class="container">
+      <button class="mobile-menu-btn" id="mobile-menu-btn">☰</button>
+      <a href="index.html" class="logo">
+        <div class="logo-icon">📱</div>
+        <div class="logo-text">Phone<span>Store</span></div>
+      </a>
+      <form class="search-bar" id="search-form">
+        <div class="search-input-wrapper">
+          <input type="text" id="search-input" class="search-input" placeholder="Tìm điện thoại, phụ kiện...">
+          <button type="submit" class="search-btn">🔍</button>
+        </div>
+        <div class="search-dropdown" id="search-dropdown"></div>
+      </form>
+      <div class="header-actions">
+        <a href="cart.html" class="header-btn">
+          <span class="btn-icon">🛒</span>
+          <span>Giỏ hàng</span>
+          <span class="cart-badge" id="cart-badge">0</span>
+        </a>
+      </div>
+    </div>
+  </div>
+  <nav class="header-nav">
+    <div class="container">
+      <a href="products.html?cat=dien-thoai" class="nav-item"><span class="nav-icon">📱</span>Điện thoại</a>
+      <a href="products.html?cat=may-tinh-bang" class="nav-item"><span class="nav-icon">📟</span>Máy tính bảng</a>
+      <a href="products.html?cat=phu-kien" class="nav-item"><span class="nav-icon">🎧</span>Phụ kiện</a>
+      <a href="products.html?cat=laptop" class="nav-item"><span class="nav-icon">💻</span>Laptop</a>
+      <a href="products.html" class="nav-item" style="margin-left:auto;background:rgba(255,255,255,.15)">🔥 Khuyến mãi</a>
+    </div>
+  </nav>
+</header>
+
+<!-- ========== MAIN ========== -->
+<main>
+  <!-- HERO CAROUSEL -->
+  <section class="hero-section">
+    <div class="hero-carousel">
+      <!-- Slide 1 -->
+      <div class="hero-slide hero-slide-1 active">
+        <div class="hero-content">
+          <div class="hero-badge">🔥 HOT DEAL</div>
+          <h1 class="hero-title">iPhone 15 Pro Max<br>Titan Edition</h1>
+          <p class="hero-subtitle">Chip A17 Pro • Camera 48MP • Khung Titan</p>
+          <div class="hero-price-label">Chỉ từ</div>
+          <div class="hero-price">28.990.000₫</div>
+          <a href="product-detail.html?id=1" class="hero-cta">Mua ngay →</a>
+        </div>
+        <div class="hero-image">
+          <img src="https://placehold.co/260x260/1a1a2e/ffffff?text=iPhone+15+Pro" alt="iPhone 15 Pro Max">
+        </div>
+      </div>
+      <!-- Slide 2 -->
+      <div class="hero-slide hero-slide-2">
+        <div class="hero-content">
+          <div class="hero-badge">⚡ SIÊU SALE</div>
+          <h1 class="hero-title">Samsung Galaxy<br>S24 Ultra</h1>
+          <p class="hero-subtitle">Camera 200MP • S Pen • Snapdragon 8 Gen 3</p>
+          <div class="hero-price-label">Giảm đến</div>
+          <div class="hero-price">-5.000.000₫</div>
+          <a href="product-detail.html?id=2" class="hero-cta">Xem ngay →</a>
+        </div>
+        <div class="hero-image">
+          <img src="https://placehold.co/260x260/d0021b/ffffff?text=Galaxy+S24" alt="Samsung Galaxy S24 Ultra">
+        </div>
+      </div>
+      <!-- Slide 3 -->
+      <div class="hero-slide hero-slide-3">
+        <div class="hero-content">
+          <div class="hero-badge">🎉 MỚI NHẤT</div>
+          <h1 class="hero-title">MacBook Air M3<br>Siêu mỏng siêu nhẹ</h1>
+          <p class="hero-subtitle">Chip M3 • Pin 18h • 1.24kg</p>
+          <div class="hero-price-label">Giá từ</div>
+          <div class="hero-price">26.990.000₫</div>
+          <a href="product-detail.html?id=16" class="hero-cta">Khám phá →</a>
+        </div>
+        <div class="hero-image">
+          <img src="https://placehold.co/260x260/0a3d62/ffffff?text=MacBook+Air+M3" alt="MacBook Air M3">
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <button class="carousel-arrow carousel-prev">‹</button>
+      <button class="carousel-arrow carousel-next">›</button>
+      <div class="carousel-controls">
+        <button class="carousel-dot active" data-index="0"></button>
+        <button class="carousel-dot" data-index="1"></button>
+        <button class="carousel-dot" data-index="2"></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- CATEGORIES -->
+  <section class="section" style="background:#fff; padding-top:20px; padding-bottom:20px; margin-bottom:8px;">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Danh mục sản phẩm</h2>
+        <a href="products.html" class="see-all-link">Xem tất cả →</a>
+      </div>
+      <div class="category-grid" id="category-grid"></div>
+    </div>
+  </section>
+
+  <!-- PROMO BANNERS -->
+  <div class="container">
+    <div class="promo-grid">
+      <div class="promo-banner promo-banner-1" onclick="location.href='products.html?cat=dien-thoai'">
+        <div>
+          <div class="promo-badge">📱 ĐẶC BIỆT</div>
+          <div class="promo-title">Điện thoại Apple</div>
+          <div class="promo-desc">Ưu đãi lên đến 20%<br>cho các dòng iPhone mới</div>
+          <div class="promo-cta">Mua ngay</div>
+        </div>
+        <img src="https://placehold.co/120x120/0f3460/ffffff?text=iPhone" alt="iPhone" style="border-radius:12px;opacity:.9">
+      </div>
+      <div class="promo-banner promo-banner-2" onclick="location.href='products.html?cat=phu-kien'">
+        <div>
+          <div class="promo-badge">🎧 PHỤ KIỆN</div>
+          <div class="promo-title">Phụ kiện Hot</div>
+          <div class="promo-desc">Tai nghe, ốp lưng, sạc dự phòng<br>Giảm đến 30%</div>
+          <div class="promo-cta">Xem ngay</div>
+        </div>
+        <img src="https://placehold.co/120x120/a80016/ffffff?text=AirPods" alt="AirPods" style="border-radius:12px;opacity:.9">
+      </div>
+    </div>
+  </div>
+
+  <!-- FEATURED PRODUCTS -->
+  <section class="section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">⭐ Sản phẩm nổi bật</h2>
+        <a href="products.html" class="see-all-link">Xem tất cả →</a>
+      </div>
+      <div class="product-grid" id="featured-grid"></div>
+    </div>
+  </section>
+
+  <!-- SALE PRODUCTS -->
+  <section class="section" style="background:#fff8f8; padding:24px 0; margin:0 0 8px;">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title" style="color:var(--primary)">🔥 Flash Sale - Hôm nay</h2>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="font-size:13px;color:#666">Kết thúc sau:</div>
+          <div id="countdown" style="font-size:20px;font-weight:800;color:var(--primary);font-variant-numeric:tabular-nums">00:00:00</div>
+          <a href="products.html" class="see-all-link">Xem tất cả →</a>
+        </div>
+      </div>
+      <div class="product-grid product-grid-sale" id="sale-grid"></div>
+    </div>
+  </section>
+
+  <!-- ACCESSORIES -->
+  <section class="section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">🎧 Phụ kiện bán chạy</h2>
+        <a href="products.html?cat=phu-kien" class="see-all-link">Xem tất cả →</a>
+      </div>
+      <div class="product-grid" id="accessories-grid"></div>
+    </div>
+  </section>
+
+  <!-- BRANDS -->
+  <section class="section" style="background:#fff;padding:24px 0;margin-bottom:8px;">
+    <div class="container">
+      <h2 class="section-title" style="margin-bottom:20px">Thương hiệu nổi tiếng</h2>
+      <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center" id="brands-list"></div>
+    </div>
+  </section>
+</main>
+
+<!-- ========== FOOTER ========== -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-main">
+      <div class="footer-brand">
+        <div class="logo" style="margin-bottom:12px">
+          <div class="logo-icon">📱</div>
+          <div class="logo-text" style="font-size:20px">Phone<span>Store</span></div>
+        </div>
+        <p class="footer-desc">Cửa hàng điện thoại và phụ kiện chính hãng với hơn 200 sản phẩm từ các thương hiệu uy tín trên thế giới.</p>
+        <div class="footer-contact-item">📍 123 Nguyễn Văn Linh, Đà Nẵng</div>
+        <div class="footer-contact-item">📞 1800 6789 (Miễn phí)</div>
+        <div class="footer-contact-item">✉️ support@phonestore.vn</div>
+        <div class="footer-contact-item">🕐 8:00 - 22:00 (Hàng ngày)</div>
+      </div>
+      <div>
+        <div class="footer-heading">Sản phẩm</div>
+        <div class="footer-links">
+          <a href="products.html?cat=dien-thoai">Điện thoại</a>
+          <a href="products.html?cat=may-tinh-bang">Máy tính bảng</a>
+          <a href="products.html?cat=phu-kien">Phụ kiện</a>
+          <a href="products.html?cat=laptop">Laptop</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-heading">Thương hiệu</div>
+        <div class="footer-links">
+          <a href="products.html?brand=Apple">Apple</a>
+          <a href="products.html?brand=Samsung">Samsung</a>
+          <a href="products.html?brand=Xiaomi">Xiaomi</a>
+          <a href="products.html?brand=OPPO">OPPO</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-heading">Hỗ trợ</div>
+        <div class="footer-links">
+          <a href="#">Chính sách bảo hành</a>
+          <a href="#">Chính sách đổi trả</a>
+          <a href="#">Hướng dẫn mua hàng</a>
+          <a href="#">Tra cứu đơn hàng</a>
+          <a href="#">Liên hệ</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="container">
+      © 2024 PhoneStore. All rights reserved. | Được xây dựng với ❤️ bởi PBL3 Team
+    </div>
+  </div>
+</footer>
+
+<!-- Scripts -->
+<script src="js/data.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/main.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Render categories
+    const catGrid = document.getElementById('category-grid');
+    catGrid.innerHTML = categories.map(c => `
+      <a href="products.html?cat=${c.id}" class="category-card">
+        <div class="category-icon">${c.icon}</div>
+        <div class="category-name">${c.name}</div>
+        <div class="category-count">${c.count} sản phẩm</div>
+      </a>
+    `).join('');
+
+    // Render featured products
+    const featuredGrid = document.getElementById('featured-grid');
+    const featured = getFeaturedProducts().slice(0, 8);
+    featuredGrid.innerHTML = featured.map(renderProductCard).join('');
+
+    // Render sale products
+    const saleGrid = document.getElementById('sale-grid');
+    const sale = getSaleProducts().slice(0, 4);
+    saleGrid.innerHTML = sale.map(renderProductCard).join('');
+
+    // Render accessories
+    const accGrid = document.getElementById('accessories-grid');
+    const accessories = products.filter(p => p.category === 'phu-kien').slice(0, 4);
+    accGrid.innerHTML = accessories.map(renderProductCard).join('');
+
+    // Render brands
+    const brandsList = document.getElementById('brands-list');
+    brandsList.innerHTML = brands.map(b => `
+      <a href="products.html?brand=${encodeURIComponent(b)}" style="
+        background:#fff;
+        border:2px solid #eee;
+        border-radius:10px;
+        padding:12px 24px;
+        font-size:15px;
+        font-weight:700;
+        color:#333;
+        transition:all .2s;
+        cursor:pointer;
+        text-decoration:none;
+      " onmouseover="this.style.borderColor='#d0021b';this.style.color='#d0021b'" 
+         onmouseout="this.style.borderColor='#eee';this.style.color='#333'">
+        ${b}
+      </a>
+    `).join('');
+
+    // Countdown timer
+    function updateCountdown() {
+      const now = new Date();
+      const end = new Date();
+      end.setHours(23, 59, 59, 999);
+      const diff = end - now;
+      const h = Math.floor(diff / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+      document.getElementById('countdown').textContent =
+        `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    }
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+  });
+</script>
+</body>
+</html>

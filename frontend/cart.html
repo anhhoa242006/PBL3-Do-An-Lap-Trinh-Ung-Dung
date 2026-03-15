@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Giỏ hàng - PhoneStore</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu-overlay" id="mobile-menu-overlay"></div>
+<nav class="mobile-menu" id="mobile-menu">
+  <div class="mobile-menu-header">
+    <div class="logo">
+      <div class="logo-icon">📱</div>
+      <div class="logo-text">Phone<span>Store</span></div>
+    </div>
+    <button class="mobile-menu-close" id="mobile-menu-close">✕</button>
+  </div>
+  <a href="index.html" class="mobile-nav-item">🏠 Trang chủ</a>
+  <a href="products.html?cat=dien-thoai" class="mobile-nav-item">📱 Điện thoại</a>
+  <a href="products.html?cat=may-tinh-bang" class="mobile-nav-item">📟 Máy tính bảng</a>
+  <a href="products.html?cat=phu-kien" class="mobile-nav-item">🎧 Phụ kiện</a>
+  <a href="cart.html" class="mobile-nav-item">🛒 Giỏ hàng</a>
+</nav>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-top">
+    <div class="container">
+      <button class="mobile-menu-btn" id="mobile-menu-btn">☰</button>
+      <a href="index.html" class="logo">
+        <div class="logo-icon">📱</div>
+        <div class="logo-text">Phone<span>Store</span></div>
+      </a>
+      <form class="search-bar" id="search-form">
+        <div class="search-input-wrapper">
+          <input type="text" id="search-input" class="search-input" placeholder="Tìm điện thoại, phụ kiện...">
+          <button type="submit" class="search-btn">🔍</button>
+        </div>
+        <div class="search-dropdown" id="search-dropdown"></div>
+      </form>
+      <div class="header-actions">
+        <a href="cart.html" class="header-btn">
+          <span class="btn-icon">🛒</span>
+          <span>Giỏ hàng</span>
+          <span class="cart-badge" id="cart-badge">0</span>
+        </a>
+      </div>
+    </div>
+  </div>
+  <nav class="header-nav">
+    <div class="container">
+      <a href="products.html?cat=dien-thoai" class="nav-item">📱 Điện thoại</a>
+      <a href="products.html?cat=may-tinh-bang" class="nav-item">📟 Máy tính bảng</a>
+      <a href="products.html?cat=phu-kien" class="nav-item">🎧 Phụ kiện</a>
+      <a href="products.html?cat=laptop" class="nav-item">💻 Laptop</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="index.html">Trang chủ</a>
+      <span class="breadcrumb-sep">/</span>
+      <span>Giỏ hàng</span>
+    </div>
+
+    <div class="cart-layout" id="cart-layout">
+      <!-- Cart Items -->
+      <div>
+        <div class="cart-header">
+          <h1 class="cart-title">Giỏ hàng của bạn</h1>
+          <span class="cart-item-count" id="cart-item-count">0</span>
+        </div>
+
+        <div id="cart-content">
+          <!-- Will be rendered by JS -->
+        </div>
+      </div>
+
+      <!-- Order Summary -->
+      <div class="order-summary" id="order-summary-panel">
+        <div class="order-summary-title">Tóm tắt đơn hàng</div>
+
+        <div class="order-summary-row">
+          <span>Tạm tính (<span id="summary-count">0</span> sản phẩm)</span>
+          <span id="summary-subtotal">0₫</span>
+        </div>
+        <div class="order-summary-row">
+          <span>Giảm giá</span>
+          <span class="discount-amount" id="summary-discount">-0₫</span>
+        </div>
+        <div class="order-summary-row">
+          <span>Phí vận chuyển</span>
+          <span style="color:var(--success);font-weight:600">Miễn phí</span>
+        </div>
+
+        <div class="coupon-form">
+          <input type="text" class="coupon-input" id="coupon-input" placeholder="Nhập mã giảm giá">
+          <button class="coupon-btn" id="coupon-btn">Áp dụng</button>
+        </div>
+
+        <div class="order-summary-row total">
+          <span>Tổng cộng</span>
+          <span id="summary-total">0₫</span>
+        </div>
+
+        <a href="checkout.html" class="btn btn-primary btn-full btn-lg" id="checkout-btn" style="margin-top:16px;display:flex">
+          Thanh toán →
+        </a>
+
+        <a href="products.html" class="btn btn-secondary btn-full" style="margin-top:10px;display:flex">
+          ← Tiếp tục mua sắm
+        </a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-main">
+      <div class="footer-brand">
+        <div class="logo" style="margin-bottom:12px">
+          <div class="logo-icon">📱</div>
+          <div class="logo-text" style="font-size:20px">Phone<span>Store</span></div>
+        </div>
+        <p class="footer-desc">Cửa hàng điện thoại và phụ kiện chính hãng uy tín.</p>
+        <div class="footer-contact-item">📞 1800 6789</div>
+        <div class="footer-contact-item">✉️ support@phonestore.vn</div>
+      </div>
+      <div>
+        <div class="footer-heading">Sản phẩm</div>
+        <div class="footer-links">
+          <a href="products.html?cat=dien-thoai">Điện thoại</a>
+          <a href="products.html?cat=may-tinh-bang">Máy tính bảng</a>
+          <a href="products.html?cat=phu-kien">Phụ kiện</a>
+          <a href="products.html?cat=laptop">Laptop</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-heading">Hỗ trợ</div>
+        <div class="footer-links">
+          <a href="#">Bảo hành</a>
+          <a href="#">Đổi trả</a>
+          <a href="#">Liên hệ</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="container">© 2024 PhoneStore. All rights reserved.</div>
+  </div>
+</footer>
+
+<script src="js/data.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/main.js"></script>
+<script>
+  function renderCart() {
+    const items = Cart.getItems();
+    const totalItems = Cart.getTotalItems();
+    const totalPrice = Cart.getTotalPrice();
+    const totalDiscount = Cart.getTotalDiscount();
+    const originalTotal = totalPrice + totalDiscount;
+
+    document.getElementById('cart-item-count').textContent = totalItems;
+
+    if (!items.length) {
+      document.getElementById('cart-content').innerHTML = `
+        <div class="cart-empty">
+          <div class="cart-empty-icon">🛒</div>
+          <div class="cart-empty-title">Giỏ hàng trống</div>
+          <div class="cart-empty-desc">Hãy chọn thêm sản phẩm để tiến hành đặt hàng nhé!</div>
+          <a href="products.html" class="btn btn-primary btn-lg">Mua sắm ngay</a>
+        </div>
+      `;
+      document.getElementById('checkout-btn').style.opacity = '0.5';
+      document.getElementById('checkout-btn').style.pointerEvents = 'none';
+    } else {
+      document.getElementById('cart-content').innerHTML = items.map(item => `
+        <div class="cart-item" id="cart-item-${item.variantKey.replace(/[^a-z0-9]/gi, '-')}">
+          <div class="cart-item-img">
+            <img src="${item.image}" alt="${item.name}" loading="lazy">
+          </div>
+          <div class="cart-item-info">
+            <div class="cart-item-brand">${item.brand}</div>
+            <a href="product-detail.html?id=${item.productId}" class="cart-item-name">${item.name}</a>
+            <div class="cart-item-variant">
+              ${item.color ? `Màu: ${item.color}` : ''}
+              ${item.color && item.storage ? ' · ' : ''}
+              ${item.storage ? `Dung lượng: ${item.storage}` : ''}
+            </div>
+            <div class="cart-item-pricing">
+              <span class="cart-item-price">${formatPrice(item.price)}</span>
+              ${item.originalPrice > item.price
+                ? `<span class="cart-item-original">${formatPrice(item.originalPrice)}</span>`
+                : ''
+              }
+            </div>
+          </div>
+          <div class="cart-item-actions">
+            <button class="cart-remove-btn" onclick="removeCartItem('${item.variantKey}')" title="Xóa">🗑️</button>
+            <div class="cart-qty-control">
+              <button class="cart-qty-btn" onclick="updateCartQty('${item.variantKey}', ${item.quantity - 1})">−</button>
+              <span class="cart-qty-value">${item.quantity}</span>
+              <button class="cart-qty-btn" onclick="updateCartQty('${item.variantKey}', ${item.quantity + 1})">+</button>
+            </div>
+            <div class="cart-item-subtotal">${formatPrice(item.price * item.quantity)}</div>
+          </div>
+        </div>
+      `).join('');
+      document.getElementById('checkout-btn').style.opacity = '';
+      document.getElementById('checkout-btn').style.pointerEvents = '';
+    }
+
+    // Update summary
+    document.getElementById('summary-count').textContent = totalItems;
+    document.getElementById('summary-subtotal').textContent = formatPrice(originalTotal);
+    document.getElementById('summary-discount').textContent = `-${formatPrice(totalDiscount)}`;
+    document.getElementById('summary-total').textContent = formatPrice(totalPrice);
+  }
+
+  function removeCartItem(variantKey) {
+    Cart.removeItem(variantKey);
+    renderCart();
+  }
+
+  function updateCartQty(variantKey, newQty) {
+    Cart.updateQuantity(variantKey, newQty);
+    renderCart();
+  }
+
+  document.getElementById('coupon-btn').addEventListener('click', () => {
+    const code = document.getElementById('coupon-input').value.trim().toUpperCase();
+    if (code === 'PHONESTORE10') {
+      Cart.showToast('Áp dụng mã giảm giá 10% thành công!');
+    } else if (code) {
+      Cart.showToast('Mã giảm giá không hợp lệ!', 'error');
+    }
+  });
+
+  window.addEventListener('cartUpdated', renderCart);
+
+  document.addEventListener('DOMContentLoaded', renderCart);
+</script>
+</body>
+</html>
