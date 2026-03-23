@@ -1,0 +1,167 @@
+﻿CREATE DATABASE My_fear;
+GO 
+USE My_fear;
+GO
+
+-- BẢNG DANH MỤC (CATEGORIES) 
+CREATE TABLE Categories(
+   CategoryID INT PRIMARY KEY IDENTITY(1,1),
+   CategoryName NVARCHAR(100) NOT NULL, 
+   Slug NVARCHAR(150) UNIQUE,
+   Description NVARCHAR(1500),
+   ParentID INT NULL,
+   DisplayOrder INT DEFAULT 0
+);
+
+-- BẢNG THƯƠNG HIỆU (BRANDS)
+CREATE TABLE Brands(
+  BrandID INT PRIMARY KEY IDENTITY(1,1),
+  BrandName NVARCHAR(100) NOT NULL,
+  Slug NVARCHAR(150) UNIQUE
+);
+
+-- BẢNG SẢN PHẨM GỐC (PRODUCTS)
+CREATE TABLE Products (
+   ProductID INT PRIMARY KEY IDENTITY(1,1),
+   ProductName NVARCHAR(250) NOT NULL,
+   Slug NVARCHAR(250) UNIQUE,
+   ShortDescription NVARCHAR(500),
+   FullDescription NVARCHAR(MAX),
+   Specifications NVARCHAR(MAX), 
+   Warranty NVARCHAR(100),
+   ViewsCount INT DEFAULT 0,
+   CategoryID INT FOREIGN KEY REFERENCES Categories(CategoryID),
+   BrandID INT FOREIGN KEY REFERENCES Brands(BrandID),
+   IsActive BIT DEFAULT 1,
+   CreatedAt DATETIME DEFAULT GETDATE()
+);
+
+-- BẢNG BIẾN THỂ SẢN PHẨM (PRODUCTVARIANTS)
+CREATE TABLE ProductVariants (
+   VariantID INT PRIMARY KEY IDENTITY(1,1),
+   ProductID INT FOREIGN KEY REFERENCES Products(ProductID),
+   Color NVARCHAR(50),
+   Storage NVARCHAR(50),
+   Price DECIMAL(18,2) NOT NULL,
+   OriginalPrice DECIMAL(18,2),
+   StockQuantity INT DEFAULT 0,
+   SKU NVARCHAR(100) UNIQUE,
+   Barcode NVARCHAR(100),
+   Weight DECIMAL(10,2),
+   Dimensions NVARCHAR(100),
+   IsDefault BIT DEFAULT 0,
+   ImageURL NVARCHAR(500)
+);
+
+-- BẢNG QUYỀN (ROLES)
+CREATE TABLE Roles(
+   RoleID INT PRIMARY KEY IDENTITY(1,1),
+   RoleName NVARCHAR(50) NOT NULL
+);
+
+-- BẢNG NGƯỜI DÙNG (USERS)
+CREATE TABLE Users(
+   UserID INT PRIMARY KEY IDENTITY(1,1),
+   FullName NVARCHAR(100),
+   Email VARCHAR(150) UNIQUE NOT NULL,
+   PasswordHash NVARCHAR(MAX) NOT NULL,
+   PhoneNumber VARCHAR(20),
+   DateOfBirth DATE,
+   Address NVARCHAR(500),
+   IsActive BIT DEFAULT 1,
+   RoleID INT FOREIGN KEY REFERENCES Roles(RoleID),
+   CreatedAt DATETIME DEFAULT GETDATE()
+);
+
+-- BẢNG ĐỊA CHỈ NGƯỜI DÙNG
+CREATE TABLE UserAddresses (
+   AddressID INT PRIMARY KEY IDENTITY(1,1),
+   UserID INT FOREIGN KEY REFERENCES Users(UserID),
+   AddressLine NVARCHAR(500),
+   City NVARCHAR(100),
+   District NVARCHAR(100),
+   Ward NVARCHAR(100),
+   IsDefault BIT DEFAULT 0
+);
+
+-- BẢNG ĐƠN HÀNG (ORDERS)
+CREATE TABLE Orders(
+   OrderID INT PRIMARY KEY IDENTITY(1,1),
+   UserID INT FOREIGN KEY REFERENCES Users(UserID),
+   OrderDate DATETIME DEFAULT GETDATE(),
+   TotalAmount DECIMAL(18,2),
+   ShippingFee DECIMAL(18,2) DEFAULT 0,
+   DiscountAmount DECIMAL(18,2) DEFAULT 0,
+   ShippingAddress NVARCHAR(500),
+   TrackingNumber NVARCHAR(100),
+   PaymentMethod NVARCHAR(50),
+   Status NVARCHAR(50) DEFAULT 'Pending',
+   Notes NVARCHAR(500)
+);
+
+-- BẢNG CHI TIẾT ĐƠN HÀNG (ORDERDETAILS)
+CREATE TABLE OrderDetails (
+   OrderDetailID INT PRIMARY KEY IDENTITY(1,1),
+   OrderID INT FOREIGN KEY REFERENCES Orders(OrderID),
+   VariantID INT FOREIGN KEY REFERENCES ProductVariants(VariantID),
+   Quantity INT NOT NULL,
+   UnitPrice DECIMAL(18,2) NOT NULL,
+   DiscountApplied DECIMAL(18,2) DEFAULT 0,
+   WarrantyInfo NVARCHAR(200)
+);
+
+-- BẢNG ĐÁNH GIÁ (REVIEWS)
+CREATE TABLE Reviews (
+  ReviewID INT PRIMARY KEY IDENTITY(1,1),
+  ProductID INT FOREIGN KEY REFERENCES Products(ProductID),
+  UserID INT FOREIGN KEY REFERENCES Users(UserID),
+  Title NVARCHAR(200),
+  Rating INT CHECK (Rating >= 1 AND Rating <= 5),
+  Comment NVARCHAR(MAX),
+  IsApproved BIT DEFAULT 0,
+  CreatedAt DATETIME DEFAULT GETDATE()
+);
+
+-- BẢNG GIỎ HÀNG (SHOPPINGCART)
+CREATE TABLE ShoppingCart (
+   CartID INT PRIMARY KEY IDENTITY(1,1),
+   UserID INT FOREIGN KEY REFERENCES Users(UserID),
+   VariantID INT FOREIGN KEY REFERENCES ProductVariants(VariantID),
+   Quantity INT DEFAULT 1,
+   AddedAt DATETIME DEFAULT GETDATE()
+);
+
+-- BẢNG KHUYẾN MÃI/ MÃ GIẢM GIÁ (COUPONS)
+CREATE TABLE Coupons(
+   CouponID INT PRIMARY KEY IDENTITY(1,1),
+   Code NVARCHAR(50) UNIQUE,
+   Description NVARCHAR(200),
+   DiscountPercent INT,
+   DiscountAmount DECIMAL(18,2),
+   StartDate DATETIME,
+   EndDate DATETIME,
+   IsActive BIT DEFAULT 1
+);
+
+-- BẢNG BANNER QUẢNG CÁO (BANNERS)
+CREATE TABLE Banners(
+   BannerID INT PRIMARY KEY IDENTITY(1,1),
+   Title NVARCHAR(200),
+   ImageURL NVARCHAR(500),
+   LinkURL NVARCHAR(500),
+   DisplayOrder INT DEFAULT 0,
+   IsActive BIT DEFAULT 1
+);
+
+-- BẢNG GIAO DỊCH THANH TOÁN (PAYMENTTRANSACTIONS)
+CREATE TABLE PaymentTransactions (
+  TransactionID INT PRIMARY KEY IDENTITY(1,1),
+   OrderID INT FOREIGN KEY REFERENCES Orders(OrderID),
+   PaymentMethod NVARCHAR(50),
+   TransactionCode NVARCHAR(100),
+   Amount DECIMAL(18,2),
+   Status NVARCHAR(50),
+   CreatedAt DATETIME DEFAULT GETDATE()
+);
+
+GO
