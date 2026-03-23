@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Đơn hàng của tôi - PhoneStore</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📱</text></svg>" />
+</head>
+<body>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu-overlay" id="mobile-menu-overlay"></div>
+<nav class="mobile-menu" id="mobile-menu">
+  <div class="mobile-menu-header">
+    <div class="logo">
+      <div class="logo-icon">📱</div>
+      <div class="logo-text">Phone<span>Store</span></div>
+    </div>
+    <button class="mobile-menu-close" id="mobile-menu-close">✕</button>
+  </div>
+  <a href="index.html" class="mobile-nav-item">🏠 Trang chủ</a>
+  <a href="products.html?cat=dien-thoai" class="mobile-nav-item">📱 Điện thoại</a>
+  <a href="products.html?cat=may-tinh-bang" class="mobile-nav-item">📟 Máy tính bảng</a>
+  <a href="products.html?cat=phu-kien" class="mobile-nav-item">🎧 Phụ kiện</a>
+  <a href="products.html?cat=laptop" class="mobile-nav-item">💻 Laptop</a>
+  <a href="cart.html" class="mobile-nav-item">🛒 Giỏ hàng</a>
+  <a href="orders.html" class="mobile-nav-item">📦 Đơn hàng</a>
+  <a href="auth.html" class="mobile-nav-item">👤 Tài khoản</a>
+</nav>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-top">
+    <div class="container">
+      <button class="mobile-menu-btn" id="mobile-menu-btn">☰</button>
+      <a href="index.html" class="logo">
+        <div class="logo-icon">📱</div>
+        <div class="logo-text">Phone<span>Store</span></div>
+      </a>
+      <div style="flex:1"></div>
+      <div class="header-actions">
+        <a href="cart.html" class="header-btn">
+          <span class="btn-icon">🛒</span>
+          <span>Giỏ hàng</span>
+          <span class="cart-badge" id="cart-badge">0</span>
+        </a>
+        <a href="auth.html" class="header-btn header-auth-btn">
+          <span class="btn-icon">👤</span>
+          <span>Đăng nhập</span>
+        </a>
+        <div class="header-user-menu" style="display:none">
+          <span class="btn-icon">👤</span>
+          <span class="user-name"></span>
+          <a href="orders.html" class="header-btn" style="margin-left:4px">📦</a>
+          <a href="#" class="header-btn logout-btn" title="Đăng xuất">⏻</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <nav class="header-nav">
+    <div class="container">
+      <a href="products.html?cat=dien-thoai" class="nav-item"><span class="nav-icon">📱</span>Điện thoại</a>
+      <a href="products.html?cat=may-tinh-bang" class="nav-item"><span class="nav-icon">📟</span>Máy tính bảng</a>
+      <a href="products.html?cat=phu-kien" class="nav-item"><span class="nav-icon">🎧</span>Phụ kiện</a>
+      <a href="products.html?cat=laptop" class="nav-item"><span class="nav-icon">💻</span>Laptop</a>
+      <a href="orders.html" class="nav-item active"><span class="nav-icon">📦</span>Đơn hàng</a>
+      <a href="products.html" class="nav-item" style="margin-left:auto;background:rgba(255,255,255,.15)">🔥 Khuyến mãi</a>
+    </div>
+  </nav>
+</header>
+
+<!-- MAIN -->
+<main>
+  <div class="container" style="padding-top:32px;padding-bottom:60px">
+
+    <!-- Breadcrumb -->
+    <div class="breadcrumb" style="margin-bottom:24px">
+      <a href="index.html">Trang chủ</a>
+      <span class="breadcrumb-sep">›</span>
+      <span>Đơn hàng của tôi</span>
+    </div>
+
+    <h1 class="page-title">📦 Đơn hàng của tôi</h1>
+
+    <!-- Not logged in -->
+    <div id="orders-login-prompt" style="display:none;text-align:center;padding:60px 0">
+      <div style="font-size:64px;margin-bottom:16px">🔒</div>
+      <h2 style="margin-bottom:8px">Bạn chưa đăng nhập</h2>
+      <p style="color:#666;margin-bottom:24px">Vui lòng đăng nhập để xem đơn hàng của bạn.</p>
+      <a href="auth.html?redirect=orders.html" class="btn-primary">Đăng nhập ngay</a>
+    </div>
+
+    <!-- Orders section (visible when logged in) -->
+    <div id="orders-section" style="display:none">
+
+      <!-- Search bar -->
+      <div class="orders-search-bar" style="margin-bottom:24px">
+        <input type="text" id="order-search-input" class="form-input" placeholder="🔍 Tìm kiếm theo mã đơn hàng..." style="max-width:360px" />
+        <button id="order-search-btn" class="btn-primary" style="margin-left:8px">Tìm</button>
+      </div>
+
+      <!-- Status filter tabs -->
+      <div class="orders-filter-tabs" id="orders-filter-tabs" style="margin-bottom:24px">
+        <button class="orders-filter-tab active" data-status="all" onclick="filterOrders('all',this)">Tất cả</button>
+        <button class="orders-filter-tab" data-status="pending" onclick="filterOrders('pending',this)">Chờ xác nhận</button>
+        <button class="orders-filter-tab" data-status="confirmed" onclick="filterOrders('confirmed',this)">Đã xác nhận</button>
+        <button class="orders-filter-tab" data-status="shipping" onclick="filterOrders('shipping',this)">Đang giao</button>
+        <button class="orders-filter-tab" data-status="delivered" onclick="filterOrders('delivered',this)">Đã nhận</button>
+        <button class="orders-filter-tab" data-status="cancelled" onclick="filterOrders('cancelled',this)">Đã hủy</button>
+      </div>
+
+      <!-- Order cards -->
+      <div id="orders-list"></div>
+    </div>
+  </div>
+</main>
+
+<!-- Tracking Modal -->
+<div class="modal-overlay" id="tracking-modal">
+  <div class="modal-box">
+    <button class="modal-close" id="tracking-modal-close">✕</button>
+    <div id="tracking-content"></div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-main">
+      <div class="footer-brand">
+        <div class="logo" style="margin-bottom:12px">
+          <div class="logo-icon">📱</div>
+          <div class="logo-text" style="font-size:20px">Phone<span>Store</span></div>
+        </div>
+        <p class="footer-desc">Cửa hàng điện thoại và phụ kiện chính hãng với hơn 200 sản phẩm từ các thương hiệu uy tín trên thế giới.</p>
+      </div>
+      <div>
+        <div class="footer-heading">Hỗ trợ</div>
+        <div class="footer-links">
+          <a href="#">Chính sách bảo hành</a>
+          <a href="#">Chính sách đổi trả</a>
+          <a href="orders.html">Tra cứu đơn hàng</a>
+          <a href="#">Liên hệ</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="container">
+      © 2026 PhoneStore. All rights reserved. | Được xây dựng với ❤️ bởi PBL3 Team
+    </div>
+  </div>
+</footer>
+
+<script src="js/data.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/orders.js"></script>
+<script src="js/main.js"></script>
+<script>
+  function filterOrders(status, btn) {
+    document.querySelectorAll('.orders-filter-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.order-card').forEach(card => {
+      if (status === 'all') {
+        card.style.display = '';
+      } else {
+        card.style.display = card.dataset.status === status ? '' : 'none';
+      }
+    });
+  }
+
+  // Attach data-status attributes after orders render
+  document.addEventListener('DOMContentLoaded', () => {
+    // Give orders.js time to render cards first, then add data-status
+    setTimeout(() => {
+      document.querySelectorAll('.order-card').forEach(card => {
+        const id = card.id.replace('order-', '');
+        const order = Orders.getById(id);
+        if (order) card.dataset.status = order.status;
+      });
+    }, 50);
+  });
+</script>
+</body>
+</html>

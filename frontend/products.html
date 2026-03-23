@@ -24,6 +24,8 @@
   <a href="products.html?cat=phu-kien" class="mobile-nav-item">🎧 Phụ kiện</a>
   <a href="products.html?cat=laptop" class="mobile-nav-item">💻 Laptop</a>
   <a href="cart.html" class="mobile-nav-item">🛒 Giỏ hàng</a>
+  <a href="orders.html" class="mobile-nav-item">📦 Đơn hàng</a>
+  <a href="auth.html" class="mobile-nav-item">👤 Tài khoản</a>
 </nav>
 
 <!-- HEADER -->
@@ -48,6 +50,16 @@
           <span>Giỏ hàng</span>
           <span class="cart-badge" id="cart-badge">0</span>
         </a>
+        <a href="auth.html" class="header-btn header-auth-btn">
+          <span class="btn-icon">👤</span>
+          <span>Đăng nhập</span>
+        </a>
+        <div class="header-user-menu" style="display:none">
+          <span class="btn-icon">👤</span>
+          <span class="user-name"></span>
+          <a href="orders.html" class="header-btn" style="margin-left:4px">📦</a>
+          <a href="#" class="header-btn logout-btn" title="Đăng xuất">⏻</a>
+        </div>
       </div>
     </div>
   </div>
@@ -57,6 +69,7 @@
       <a href="products.html?cat=may-tinh-bang" class="nav-item">📟 Máy tính bảng</a>
       <a href="products.html?cat=phu-kien" class="nav-item">🎧 Phụ kiện</a>
       <a href="products.html?cat=laptop" class="nav-item">💻 Laptop</a>
+      <a href="orders.html" class="nav-item">📦 Đơn hàng</a>
     </div>
   </nav>
 </header>
@@ -158,6 +171,7 @@
 
 <script src="js/data.js"></script>
 <script src="js/cart.js"></script>
+<script src="js/auth.js"></script>
 <script src="js/main.js"></script>
 <script>
   const PER_PAGE = 12;

@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Đăng nhập / Đăng ký - PhoneStore</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📱</text></svg>" />
+</head>
+<body>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu-overlay" id="mobile-menu-overlay"></div>
+<nav class="mobile-menu" id="mobile-menu">
+  <div class="mobile-menu-header">
+    <div class="logo">
+      <div class="logo-icon">📱</div>
+      <div class="logo-text">Phone<span>Store</span></div>
+    </div>
+    <button class="mobile-menu-close" id="mobile-menu-close">✕</button>
+  </div>
+  <a href="index.html" class="mobile-nav-item">🏠 Trang chủ</a>
+  <a href="products.html?cat=dien-thoai" class="mobile-nav-item">📱 Điện thoại</a>
+  <a href="products.html?cat=may-tinh-bang" class="mobile-nav-item">📟 Máy tính bảng</a>
+  <a href="products.html?cat=phu-kien" class="mobile-nav-item">🎧 Phụ kiện</a>
+  <a href="products.html?cat=laptop" class="mobile-nav-item">💻 Laptop</a>
+  <a href="cart.html" class="mobile-nav-item">🛒 Giỏ hàng</a>
+  <a href="orders.html" class="mobile-nav-item">📦 Đơn hàng</a>
+  <a href="auth.html" class="mobile-nav-item">👤 Đăng nhập</a>
+</nav>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-top">
+    <div class="container">
+      <button class="mobile-menu-btn" id="mobile-menu-btn">☰</button>
+      <a href="index.html" class="logo">
+        <div class="logo-icon">📱</div>
+        <div class="logo-text">Phone<span>Store</span></div>
+      </a>
+      <div style="flex:1"></div>
+      <div class="header-actions">
+        <a href="cart.html" class="header-btn">
+          <span class="btn-icon">🛒</span>
+          <span>Giỏ hàng</span>
+          <span class="cart-badge" id="cart-badge">0</span>
+        </a>
+        <a href="auth.html" class="header-btn header-auth-btn">
+          <span class="btn-icon">👤</span>
+          <span>Đăng nhập</span>
+        </a>
+        <div class="header-user-menu" style="display:none">
+          <span class="btn-icon">👤</span>
+          <span class="user-name"></span>
+          <a href="orders.html" class="header-btn" style="margin-left:4px">📦</a>
+          <a href="#" class="header-btn logout-btn" title="Đăng xuất">⏻</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <nav class="header-nav">
+    <div class="container">
+      <a href="products.html?cat=dien-thoai" class="nav-item"><span class="nav-icon">📱</span>Điện thoại</a>
+      <a href="products.html?cat=may-tinh-bang" class="nav-item"><span class="nav-icon">📟</span>Máy tính bảng</a>
+      <a href="products.html?cat=phu-kien" class="nav-item"><span class="nav-icon">🎧</span>Phụ kiện</a>
+      <a href="products.html?cat=laptop" class="nav-item"><span class="nav-icon">💻</span>Laptop</a>
+      <a href="orders.html" class="nav-item"><span class="nav-icon">📦</span>Đơn hàng</a>
+      <a href="products.html" class="nav-item" style="margin-left:auto;background:rgba(255,255,255,.15)">🔥 Khuyến mãi</a>
+    </div>
+  </nav>
+</header>
+
+<!-- MAIN -->
+<main>
+  <div class="container" style="padding-top:40px;padding-bottom:60px;max-width:480px">
+
+    <!-- Breadcrumb -->
+    <div class="breadcrumb" style="margin-bottom:24px">
+      <a href="index.html">Trang chủ</a>
+      <span class="breadcrumb-sep">›</span>
+      <span id="breadcrumb-label">Đăng nhập</span>
+    </div>
+
+    <!-- Already logged in -->
+    <div id="already-logged-in" style="display:none;text-align:center;padding:40px 0">
+      <div style="font-size:64px;margin-bottom:16px">👋</div>
+      <h2 style="margin-bottom:8px">Xin chào, <span id="logged-in-name"></span>!</h2>
+      <p style="color:#666;margin-bottom:24px">Bạn đã đăng nhập thành công.</p>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+        <a href="orders.html" class="btn-primary">📦 Xem đơn hàng</a>
+        <a href="index.html" class="btn-outline">🏠 Về trang chủ</a>
+        <button class="btn-outline logout-btn" style="color:var(--primary);border-color:var(--primary)">⏻ Đăng xuất</button>
+      </div>
+    </div>
+
+    <!-- Auth forms -->
+    <div id="auth-forms">
+      <!-- Tabs -->
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tab-login" onclick="switchTab('login')">Đăng nhập</button>
+        <button class="auth-tab" id="tab-register" onclick="switchTab('register')">Đăng ký</button>
+      </div>
+
+      <!-- Login Form -->
+      <div id="form-login" class="auth-form-panel">
+        <h2 class="auth-title">Chào mừng trở lại!</h2>
+        <p class="auth-subtitle">Đăng nhập để xem đơn hàng và nhận ưu đãi cá nhân.</p>
+
+        <form id="login-form" novalidate>
+          <div class="form-group">
+            <label class="form-label" for="login-email">Email <span class="required">*</span></label>
+            <input type="email" id="login-email" class="form-input" placeholder="example@email.com" required />
+            <div class="form-error" id="login-email-err"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="login-password">Mật khẩu <span class="required">*</span></label>
+            <div class="input-password-wrapper">
+              <input type="password" id="login-password" class="form-input" placeholder="Nhập mật khẩu" required />
+              <button type="button" class="toggle-password" onclick="togglePassword('login-password', this)">👁</button>
+            </div>
+            <div class="form-error" id="login-password-err"></div>
+          </div>
+          <div class="form-error" id="login-general-err" style="margin-bottom:12px"></div>
+          <button type="submit" class="btn-primary btn-full" id="login-submit-btn">Đăng nhập</button>
+        </form>
+
+        <div class="auth-footer-text">
+          Chưa có tài khoản?
+          <a href="#" onclick="switchTab('register');return false">Đăng ký ngay</a>
+        </div>
+      </div>
+
+      <!-- Register Form -->
+      <div id="form-register" class="auth-form-panel" style="display:none">
+        <h2 class="auth-title">Tạo tài khoản mới</h2>
+        <p class="auth-subtitle">Đăng ký để mua sắm và theo dõi đơn hàng dễ dàng hơn.</p>
+
+        <form id="register-form" novalidate>
+          <div class="form-group">
+            <label class="form-label" for="reg-name">Họ và tên <span class="required">*</span></label>
+            <input type="text" id="reg-name" class="form-input" placeholder="Nguyễn Văn A" required />
+            <div class="form-error" id="reg-name-err"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="reg-email">Email <span class="required">*</span></label>
+            <input type="email" id="reg-email" class="form-input" placeholder="example@email.com" required />
+            <div class="form-error" id="reg-email-err"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="reg-phone">Số điện thoại <span class="required">*</span></label>
+            <input type="tel" id="reg-phone" class="form-input" placeholder="09xxxxxxxx" required />
+            <div class="form-error" id="reg-phone-err"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="reg-password">Mật khẩu <span class="required">*</span></label>
+            <div class="input-password-wrapper">
+              <input type="password" id="reg-password" class="form-input" placeholder="Ít nhất 6 ký tự" required />
+              <button type="button" class="toggle-password" onclick="togglePassword('reg-password', this)">👁</button>
+            </div>
+            <div class="form-error" id="reg-password-err"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="reg-confirm">Xác nhận mật khẩu <span class="required">*</span></label>
+            <div class="input-password-wrapper">
+              <input type="password" id="reg-confirm" class="form-input" placeholder="Nhập lại mật khẩu" required />
+              <button type="button" class="toggle-password" onclick="togglePassword('reg-confirm', this)">👁</button>
+            </div>
+            <div class="form-error" id="reg-confirm-err"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-check">
+              <input type="checkbox" id="reg-terms" required />
+              <span>Tôi đồng ý với <a href="#">điều khoản sử dụng</a> và <a href="#">chính sách bảo mật</a></span>
+            </label>
+            <div class="form-error" id="reg-terms-err"></div>
+          </div>
+          <div class="form-error" id="reg-general-err" style="margin-bottom:12px"></div>
+          <button type="submit" class="btn-primary btn-full" id="reg-submit-btn">Đăng ký</button>
+        </form>
+
+        <div class="auth-footer-text">
+          Đã có tài khoản?
+          <a href="#" onclick="switchTab('login');return false">Đăng nhập ngay</a>
+        </div>
+      </div>
+    </div>
+    <!-- /auth-forms -->
+
+  </div>
+</main>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-main">
+      <div class="footer-brand">
+        <div class="logo" style="margin-bottom:12px">
+          <div class="logo-icon">📱</div>
+          <div class="logo-text" style="font-size:20px">Phone<span>Store</span></div>
+        </div>
+        <p class="footer-desc">Cửa hàng điện thoại và phụ kiện chính hãng với hơn 200 sản phẩm từ các thương hiệu uy tín trên thế giới.</p>
+      </div>
+      <div>
+        <div class="footer-heading">Tài khoản</div>
+        <div class="footer-links">
+          <a href="auth.html">Đăng nhập</a>
+          <a href="auth.html?tab=register">Đăng ký</a>
+          <a href="orders.html">Đơn hàng của tôi</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-heading">Hỗ trợ</div>
+        <div class="footer-links">
+          <a href="#">Chính sách bảo hành</a>
+          <a href="#">Chính sách đổi trả</a>
+          <a href="orders.html">Tra cứu đơn hàng</a>
+          <a href="#">Liên hệ</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="container">
+      © 2026 PhoneStore. All rights reserved. | Được xây dựng với ❤️ bởi PBL3 Team
+    </div>
+  </div>
+</footer>
+
+<script src="js/data.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/main.js"></script>
+<script>
+  // ---- Tab switching ----
+  function switchTab(tab) {
+    document.getElementById('form-login').style.display = tab === 'login' ? '' : 'none';
+    document.getElementById('form-register').style.display = tab === 'register' ? '' : 'none';
+    document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+    document.getElementById('tab-register').classList.toggle('active', tab === 'register');
+    document.getElementById('breadcrumb-label').textContent = tab === 'login' ? 'Đăng nhập' : 'Đăng ký';
+  }
+
+  // ---- Toggle password visibility ----
+  function togglePassword(inputId, btn) {
+    const input = document.getElementById(inputId);
+    if (input.type === 'password') {
+      input.type = 'text';
+      btn.textContent = '🙈';
+    } else {
+      input.type = 'password';
+      btn.textContent = '👁';
+    }
+  }
+
+  // ---- Validation helpers ----
+  function showError(id, msg) {
+    const el = document.getElementById(id);
+    if (el) { el.textContent = msg; el.style.display = msg ? 'block' : 'none'; }
+  }
+
+  function clearErrors(...ids) {
+    ids.forEach(id => showError(id, ''));
+  }
+
+  function isValidEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
+
+  function isValidPhone(phone) {
+    return /^(0[3-9])\d{8}$/.test(phone.replace(/\s/g, ''));
+  }
+
+  // ---- Login form ----
+  document.getElementById('login-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    clearErrors('login-email-err', 'login-password-err', 'login-general-err');
+
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    let valid = true;
+
+    if (!email) { showError('login-email-err', 'Vui lòng nhập email.'); valid = false; }
+    else if (!isValidEmail(email)) { showError('login-email-err', 'Email không hợp lệ.'); valid = false; }
+
+    if (!password) { showError('login-password-err', 'Vui lòng nhập mật khẩu.'); valid = false; }
+
+    if (!valid) return;
+
+    const result = Auth.login(email, password);
+    if (result.success) {
+      Cart.showToast('Đăng nhập thành công! Chào ' + result.user.fullName);
+      const redirect = new URLSearchParams(window.location.search).get('redirect') || 'index.html';
+      setTimeout(() => { window.location.href = redirect; }, 800);
+    } else {
+      showError('login-general-err', result.message);
+    }
+  });
+
+  // ---- Register form ----
+  document.getElementById('register-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    clearErrors('reg-name-err', 'reg-email-err', 'reg-phone-err', 'reg-password-err', 'reg-confirm-err', 'reg-terms-err', 'reg-general-err');
+
+    const name = document.getElementById('reg-name').value.trim();
+    const email = document.getElementById('reg-email').value.trim();
+    const phone = document.getElementById('reg-phone').value.trim();
+    const password = document.getElementById('reg-password').value;
+    const confirm = document.getElementById('reg-confirm').value;
+    const terms = document.getElementById('reg-terms').checked;
+    let valid = true;
+
+    if (!name || name.length < 2) { showError('reg-name-err', 'Họ tên phải có ít nhất 2 ký tự.'); valid = false; }
+    if (!email) { showError('reg-email-err', 'Vui lòng nhập email.'); valid = false; }
+    else if (!isValidEmail(email)) { showError('reg-email-err', 'Email không hợp lệ.'); valid = false; }
+    if (!phone) { showError('reg-phone-err', 'Vui lòng nhập số điện thoại.'); valid = false; }
+    else if (!isValidPhone(phone)) { showError('reg-phone-err', 'Số điện thoại không hợp lệ (VD: 0901234567).'); valid = false; }
+    if (!password || password.length < 6) { showError('reg-password-err', 'Mật khẩu phải có ít nhất 6 ký tự.'); valid = false; }
+    if (password !== confirm) { showError('reg-confirm-err', 'Mật khẩu xác nhận không khớp.'); valid = false; }
+    if (!terms) { showError('reg-terms-err', 'Bạn phải đồng ý với điều khoản sử dụng.'); valid = false; }
+
+    if (!valid) return;
+
+    const result = Auth.register(name, email, phone, password);
+    if (result.success) {
+      Cart.showToast('Đăng ký thành công! Chào mừng ' + result.user.fullName);
+      setTimeout(() => { window.location.href = 'index.html'; }, 800);
+    } else {
+      showError('reg-general-err', result.message);
+    }
+  });
+
+  // ---- Check if already logged in ----
+  document.addEventListener('DOMContentLoaded', () => {
+    // Check for ?tab=register
+    const tab = new URLSearchParams(window.location.search).get('tab');
+    if (tab === 'register') switchTab('register');
+
+    const user = Auth.getCurrentUser();
+    if (user) {
+      document.getElementById('already-logged-in').style.display = '';
+      document.getElementById('auth-forms').style.display = 'none';
+      document.getElementById('logged-in-name').textContent = user.fullName;
+    }
+  });
+</script>
+</body>
+</html>
