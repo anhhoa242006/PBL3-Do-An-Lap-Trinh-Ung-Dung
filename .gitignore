@@ -1,2 +1,8 @@
 backend/node_modules/
 backend/.env
+
+# .NET build artifacts
+PhoneStoreMVC/bin/
+PhoneStoreMVC/obj/
+PhoneStoreMVC/*.user
+PhoneStoreMVC/.vs/

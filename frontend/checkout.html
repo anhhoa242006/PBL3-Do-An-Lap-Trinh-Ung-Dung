@@ -234,6 +234,7 @@
 
 <script src="js/data.js"></script>
 <script src="js/cart.js"></script>
+<script src="js/auth.js"></script>
 <script src="js/main.js"></script>
 <script>
   function selectPayment(method, el) {
@@ -303,26 +304,78 @@
     return valid;
   }
 
-  document.getElementById('place-order-btn').addEventListener('click', () => {
+  document.getElementById('place-order-btn').addEventListener('click', async () => {
     if (!validateForm()) {
       document.querySelector('.form-input.error, .form-select.error')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
 
-    if (!Cart.getItems().length) {
+    const cartItems = Cart.getItems();
+    if (!cartItems.length) {
       Cart.showToast('Giỏ hàng của bạn đang trống!', 'error');
       return;
     }
 
-    // Generate order number
-    const orderNum = `PS${Date.now().toString().slice(-6)}`;
-    document.getElementById('modal-order-num').textContent = `Mã đơn hàng: #${orderNum}`;
+    const paymentEl = document.querySelector('input[name="payment"]:checked');
+    const paymentMethod = paymentEl ? paymentEl.value.toUpperCase() : 'COD';
+    const address = [
+      document.getElementById('address').value.trim(),
+      document.getElementById('district').value.trim(),
+      document.getElementById('province').value.trim(),
+    ].filter(Boolean).join(', ');
+    const notes = document.getElementById('notes')?.value?.trim() || '';
 
-    // Clear cart
-    Cart.clearCart();
+    const btn = document.getElementById('place-order-btn');
+    btn.disabled = true;
+    btn.textContent = 'Đang xử lý...';
 
-    // Show success modal
-    document.getElementById('success-modal').classList.add('open');
+    const user = Auth.getCurrentUser();
+    const token = Auth.getToken();
+
+    // Build items list for API
+    const orderItems = cartItems.map(item => ({
+      variantId: item.variantKey ? parseInt(item.variantKey.split('-')[1]) || 0 : 0,
+      quantity: item.quantity,
+    })).filter(i => i.variantId > 0);
+
+    // If logged in, use API; otherwise create order locally
+    if (user && token && orderItems.length > 0) {
+      try {
+        const res = await fetch(`${PHONESTORE_API_BASE}/orders`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            shippingAddress: address,
+            paymentMethod,
+            notes,
+            items: orderItems,
+          }),
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          const orderNum = data.order?.orderId || 'PS' + Date.now().toString().slice(-6);
+          document.getElementById('modal-order-num').textContent = `Mã đơn hàng: #${orderNum}`;
+          Cart.clearCart();
+          document.getElementById('success-modal').classList.add('open');
+        } else {
+          Cart.showToast(data.message || 'Đặt hàng thất bại. Vui lòng thử lại.', 'error');
+        }
+      } catch (e) {
+        Cart.showToast('Lỗi kết nối. Vui lòng thử lại.', 'error');
+      }
+    } else {
+      // Not logged in or cart items don't have variant IDs – fallback local
+      const orderNum = `PS${Date.now().toString().slice(-6)}`;
+      document.getElementById('modal-order-num').textContent = `Mã đơn hàng: #${orderNum}`;
+      Cart.clearCart();
+      document.getElementById('success-modal').classList.add('open');
+    }
+
+    btn.disabled = false;
+    btn.textContent = '✅ Đặt hàng ngay';
   });
 
   document.addEventListener('DOMContentLoaded', renderCheckoutSummary);

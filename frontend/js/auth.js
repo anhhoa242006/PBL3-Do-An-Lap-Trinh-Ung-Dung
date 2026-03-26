@@ -4,9 +4,10 @@
 
 const AUTH_KEY = 'phonestore_users';
 const SESSION_KEY = 'phonestore_current_user';
+const TOKEN_KEY = 'phonestore_token';
 const API_BASE = typeof window.getApiBase === 'function'
   ? window.getApiBase()
-  : 'http://localhost:3000/api';
+  : 'http://localhost:5000/api';
 
 const Auth = {
   getUsers() {
@@ -29,13 +30,24 @@ const Auth = {
     }
   },
 
-  setCurrentUser(user) {
+  getToken() {
+    return localStorage.getItem(TOKEN_KEY) || null;
+  },
+
+  setCurrentUser(user, token) {
     if (user) {
       localStorage.setItem(SESSION_KEY, JSON.stringify(user));
+      if (token) localStorage.setItem(TOKEN_KEY, token);
     } else {
       localStorage.removeItem(SESSION_KEY);
+      localStorage.removeItem(TOKEN_KEY);
     }
     window.dispatchEvent(new CustomEvent('authChanged', { detail: { user } }));
+  },
+
+  getAuthHeaders() {
+    const token = this.getToken();
+    return token ? { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
   },
 
   async register(fullName, email, phone, password) {
@@ -49,7 +61,7 @@ const Auth = {
       if (!response.ok || !data.success) {
         return { success: false, message: data.message || 'Đăng ký thất bại.' };
       }
-      this.setCurrentUser(data.user);
+      this.setCurrentUser(data.user, data.token);
       return { success: true, user: data.user };
     } catch (error) {
       return { success: false, message: 'Không thể kết nối đến máy chủ.' };
@@ -67,7 +79,7 @@ const Auth = {
       if (!response.ok || !data.success) {
         return { success: false, message: data.message || 'Email hoặc mật khẩu không đúng.' };
       }
-      this.setCurrentUser(data.user);
+      this.setCurrentUser(data.user, data.token);
       return { success: true, user: data.user };
     } catch (error) {
       return { success: false, message: 'Không thể kết nối đến máy chủ.' };
@@ -82,6 +94,7 @@ const Auth = {
     return !!this.getCurrentUser();
   },
 };
+
 
 // Update header auth buttons across all pages
 function updateAuthUI() {

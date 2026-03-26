@@ -117,6 +117,57 @@
     return variants.reduce((sum, v) => sum + (v.stock || 0), 0);
   }
 
+  function formatPrice(n) {
+    if (!n && n !== 0) return '—';
+    return Number(n).toLocaleString('vi-VN') + '₫';
+  }
+
+  async function loadAdminStats() {
+    try {
+      const res = await fetch(`${PHONESTORE_API_BASE}/admin/stats`, {
+        headers: Auth.getAuthHeaders(),
+      });
+      if (!res.ok) return null;
+      return await res.json();
+    } catch { return null; }
+  }
+
+  async function loadAdminOrders() {
+    try {
+      const res = await fetch(`${PHONESTORE_API_BASE}/admin/orders?pageSize=10`, {
+        headers: Auth.getAuthHeaders(),
+      });
+      if (!res.ok) return null;
+      return await res.json();
+    } catch { return null; }
+  }
+
+  const STATUS_LABELS = {
+    Pending:   { label: 'Chờ xử lý',    color: '#f59e0b' },
+    Confirmed: { label: 'Đã xác nhận',   color: '#3b82f6' },
+    Shipping:  { label: 'Đang giao',      color: '#8b5cf6' },
+    Delivered: { label: 'Đã giao',        color: '#10b981' },
+    Cancelled: { label: 'Đã hủy',         color: '#ef4444' },
+  };
+
+  async function updateOrderStatus(orderId, selectEl) {
+    const status = selectEl.value;
+    try {
+      const res = await fetch(`${PHONESTORE_API_BASE}/admin/orders/${orderId}/status`, {
+        method: 'PATCH',
+        headers: Auth.getAuthHeaders(),
+        body: JSON.stringify({ status }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        Cart.showToast?.(`Cập nhật đơn hàng #${orderId} thành công!`) ||
+          alert(`Cập nhật thành công!`);
+      }
+    } catch (e) {
+      alert('Lỗi cập nhật trạng thái: ' + e.message);
+    }
+  }
+
   document.addEventListener('DOMContentLoaded', async () => {
     if (typeof loadCatalog === 'function') {
       await loadCatalog();
@@ -155,29 +206,110 @@
     accessEl.style.display = 'none';
     contentEl.style.display = '';
 
-    const totalProducts = products.length;
-    const totalCategories = categories.length;
-    const totalBrands = brands.length;
-    const totalStock = products.reduce((sum, p) => sum + formatStock(p.variants || []), 0);
+    // Load stats from API
+    const [stats, ordersData] = await Promise.all([loadAdminStats(), loadAdminOrders()]);
 
-    document.getElementById('admin-summary').innerHTML = `
-      <div class="admin-card">
-        <div class="admin-card-label">Sản phẩm</div>
-        <div class="admin-card-value">${totalProducts}</div>
-      </div>
-      <div class="admin-card">
-        <div class="admin-card-label">Danh mục</div>
-        <div class="admin-card-value">${totalCategories}</div>
-      </div>
-      <div class="admin-card">
-        <div class="admin-card-label">Thương hiệu</div>
-        <div class="admin-card-value">${totalBrands}</div>
-      </div>
-      <div class="admin-card">
-        <div class="admin-card-label">Tồn kho</div>
-        <div class="admin-card-value">${totalStock}</div>
-      </div>
-    `;
+    if (stats) {
+      document.getElementById('admin-summary').innerHTML = `
+        <div class="admin-card">
+          <div class="admin-card-label">Sản phẩm</div>
+          <div class="admin-card-value">${stats.totalProducts}</div>
+        </div>
+        <div class="admin-card">
+          <div class="admin-card-label">Đơn hàng</div>
+          <div class="admin-card-value">${stats.totalOrders}</div>
+        </div>
+        <div class="admin-card">
+          <div class="admin-card-label">Khách hàng</div>
+          <div class="admin-card-value">${stats.totalUsers}</div>
+        </div>
+        <div class="admin-card">
+          <div class="admin-card-label">Doanh thu</div>
+          <div class="admin-card-value" style="font-size:18px">${formatPrice(stats.totalRevenue)}</div>
+        </div>
+        <div class="admin-card">
+          <div class="admin-card-label">Chờ xử lý</div>
+          <div class="admin-card-value" style="color:#f59e0b">${stats.pendingOrders}</div>
+        </div>
+        <div class="admin-card">
+          <div class="admin-card-label">Sắp hết hàng</div>
+          <div class="admin-card-value" style="color:#ef4444">${stats.lowStockVariants}</div>
+        </div>
+      `;
+    } else {
+      // Fallback to catalog data
+      const totalProducts = products.length;
+      const totalCategories = categories.length;
+      const totalBrands = brands.length;
+      const totalStock = products.reduce((sum, p) => sum + formatStock(p.variants || []), 0);
+      document.getElementById('admin-summary').innerHTML = `
+        <div class="admin-card">
+          <div class="admin-card-label">Sản phẩm</div>
+          <div class="admin-card-value">${totalProducts}</div>
+        </div>
+        <div class="admin-card">
+          <div class="admin-card-label">Danh mục</div>
+          <div class="admin-card-value">${totalCategories}</div>
+        </div>
+        <div class="admin-card">
+          <div class="admin-card-label">Thương hiệu</div>
+          <div class="admin-card-value">${totalBrands}</div>
+        </div>
+        <div class="admin-card">
+          <div class="admin-card-label">Tổng tồn kho</div>
+          <div class="admin-card-value">${totalStock}</div>
+        </div>
+      `;
+    }
+
+    // Render orders table if available
+    if (ordersData && ordersData.orders && ordersData.orders.length > 0) {
+      const ordersSection = document.createElement('div');
+      ordersSection.className = 'admin-section';
+      ordersSection.innerHTML = `
+        <div class="admin-section-header">
+          <h2>Đơn hàng gần đây</h2>
+          <span>${ordersData.total} đơn hàng</span>
+        </div>
+        <div class="admin-table-wrapper">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>#ID</th>
+                <th>Khách hàng</th>
+                <th>Ngày đặt</th>
+                <th>Tổng tiền</th>
+                <th>Thanh toán</th>
+                <th>Trạng thái</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${ordersData.orders.map(o => {
+                const st = STATUS_LABELS[o.status] || { label: o.status, color: '#666' };
+                return `
+                  <tr>
+                    <td>#${o.orderId}</td>
+                    <td>${o.customerName || o.customerEmail || 'Khách'}</td>
+                    <td>${new Date(o.orderDate).toLocaleDateString('vi-VN')}</td>
+                    <td>${formatPrice(o.totalAmount)}</td>
+                    <td>${o.paymentMethod || 'COD'}</td>
+                    <td>
+                      <select onchange="updateOrderStatus(${o.orderId}, this)"
+                        style="border:1px solid ${st.color};color:${st.color};border-radius:4px;padding:2px 6px;font-size:12px;cursor:pointer">
+                        ${['Pending','Confirmed','Shipping','Delivered','Cancelled'].map(s =>
+                          `<option value="${s}" ${s === o.status ? 'selected' : ''}>${STATUS_LABELS[s]?.label || s}</option>`
+                        ).join('')}
+                      </select>
+                    </td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+      contentEl.querySelector('.admin-section')?.before(ordersSection);
+    }
 
     const rows = products.map(product => `
       <tr>
@@ -197,7 +329,7 @@
       </tr>
     `).join('');
 
-    document.getElementById('admin-product-count').textContent = `Tổng: ${totalProducts} sản phẩm`;
+    document.getElementById('admin-product-count').textContent = `Tổng: ${products.length} sản phẩm`;
     document.getElementById('admin-products-body').innerHTML = rows;
   });
 </script>
