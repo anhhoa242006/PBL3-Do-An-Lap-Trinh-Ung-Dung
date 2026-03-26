@@ -4,6 +4,7 @@
 
 const AUTH_KEY = 'phonestore_users';
 const SESSION_KEY = 'phonestore_current_user';
+const API_BASE = window.PHONESTORE_API_BASE || 'http://localhost:3000/api';
 
 const Auth = {
   getUsers() {
@@ -35,35 +36,40 @@ const Auth = {
     window.dispatchEvent(new CustomEvent('authChanged', { detail: { user } }));
   },
 
-  register(fullName, email, phone, password) {
-    const users = this.getUsers();
-    if (users.find(u => u.email === email)) {
-      return { success: false, message: 'Email này đã được sử dụng.' };
+  async register(fullName, email, phone, password) {
+    try {
+      const response = await fetch(`${API_BASE}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fullName, email, phone, password }),
+      });
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        return { success: false, message: data.message || 'Đăng ký thất bại.' };
+      }
+      this.setCurrentUser(data.user);
+      return { success: true, user: data.user };
+    } catch (error) {
+      return { success: false, message: 'Không thể kết nối đến máy chủ.' };
     }
-    const newUser = {
-      id: Date.now(),
-      fullName,
-      email,
-      phone,
-      password, // NOTE: In a real app, passwords must be hashed server-side (e.g., bcrypt). This localStorage-only demo stores passwords in plaintext for simplicity.
-      createdAt: new Date().toISOString(),
-    };
-    users.push(newUser);
-    this.saveUsers(users);
-    const { password: _, ...safeUser } = newUser;
-    this.setCurrentUser(safeUser);
-    return { success: true, user: safeUser };
   },
 
-  login(email, password) {
-    const users = this.getUsers();
-    const user = users.find(u => u.email === email && u.password === password);
-    if (!user) {
-      return { success: false, message: 'Email hoặc mật khẩu không đúng.' };
+  async login(email, password) {
+    try {
+      const response = await fetch(`${API_BASE}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        return { success: false, message: data.message || 'Email hoặc mật khẩu không đúng.' };
+      }
+      this.setCurrentUser(data.user);
+      return { success: true, user: data.user };
+    } catch (error) {
+      return { success: false, message: 'Không thể kết nối đến máy chủ.' };
     }
-    const { password: _, ...safeUser } = user;
-    this.setCurrentUser(safeUser);
-    return { success: true, user: safeUser };
   },
 
   logout() {
@@ -87,7 +93,24 @@ function updateAuthUI() {
   userMenus.forEach(menu => {
     menu.style.display = user ? '' : 'none';
     const nameEl = menu.querySelector('.user-name');
-    if (nameEl && user) nameEl.textContent = user.fullName;
+    if (nameEl && user) {
+      const role = user.role ? ` · ${user.role}` : '';
+      nameEl.textContent = `${user.fullName}${role}`;
+    }
+
+    if (user) {
+      const isAdmin = ['Admin', 'Staff'].includes(user.role);
+      let adminLink = menu.querySelector('.admin-link');
+      if (!adminLink) {
+        adminLink = document.createElement('a');
+        adminLink.href = 'admin.html';
+        adminLink.className = 'header-btn admin-link';
+        adminLink.title = 'Quản trị';
+        adminLink.textContent = '⚙️';
+        menu.appendChild(adminLink);
+      }
+      adminLink.style.display = isAdmin ? '' : 'none';
+    }
   });
 }
 

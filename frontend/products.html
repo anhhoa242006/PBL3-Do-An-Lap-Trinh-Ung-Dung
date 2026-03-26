@@ -269,7 +269,10 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', async () => {
+    if (typeof loadCatalog === 'function') {
+      await loadCatalog();
+    }
     const { cat, brand } = getParams();
 
     // Set breadcrumb

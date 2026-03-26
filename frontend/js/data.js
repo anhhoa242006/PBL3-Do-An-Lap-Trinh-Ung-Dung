@@ -2,16 +2,125 @@
 // PRODUCT & CATEGORY DATA
 // =====================
 
-const categories = [
+const PHONESTORE_API_BASE = window.PHONESTORE_API_BASE
+  || localStorage.getItem('phonestore_api_base')
+  || 'http://localhost:3000/api';
+window.PHONESTORE_API_BASE = PHONESTORE_API_BASE;
+
+let catalogPromise = null;
+
+function getCategoryIcon(value) {
+  const key = String(value || '').toLowerCase();
+  if (key.includes('dien-thoai')) return '📱';
+  if (key.includes('tablet')) return '📟';
+  if (key.includes('laptop')) return '💻';
+  if (key.includes('am-thanh') || key.includes('mic')) return '🎧';
+  if (key.includes('dong-ho')) return '⌚';
+  if (key.includes('phu-kien')) return '🎒';
+  if (key.includes('pc') || key.includes('man-hinh') || key.includes('may-in')) return '🖥️';
+  if (key.includes('tivi')) return '📺';
+  return '✨';
+}
+
+async function fetchJson(path) {
+  const response = await fetch(`${PHONESTORE_API_BASE}${path}`);
+  if (!response.ok) {
+    throw new Error(`API ${path} failed: ${response.status}`);
+  }
+  return response.json();
+}
+
+function normalizeCategory(item) {
+  const id = item.id || item.slug || '';
+  return {
+    id,
+    name: item.name || item.CategoryName || '',
+    icon: item.icon || getCategoryIcon(id || item.name),
+    count: Number(item.count ?? item.ProductCount ?? 0),
+    description: item.description || item.Description || '',
+  };
+}
+
+function normalizeVariant(variant = {}) {
+  return {
+    id: variant.id || variant.VariantID || 0,
+    color: variant.color || variant.Color || '',
+    storage: variant.storage || variant.Storage || '',
+    price: Number(variant.price ?? variant.Price ?? 0),
+    originalPrice: variant.originalPrice ? Number(variant.originalPrice) : Number(variant.OriginalPrice || 0) || null,
+    stock: Number(variant.stock ?? variant.StockQuantity ?? 0),
+    sku: variant.sku || variant.SKU || '',
+    image: variant.image || variant.ImageURL || '',
+  };
+}
+
+function normalizeProduct(item) {
+  if (!item) return null;
+  const variants = (item.variants || item.Variants || []).map(normalizeVariant);
+  const images = item.images || item.Images || variants.map(v => v.image).filter(Boolean);
+  const price = Number(item.price ?? item.Price ?? (variants[0]?.price || 0));
+  const originalPrice = Number(item.originalPrice ?? item.OriginalPrice ?? (variants[0]?.originalPrice || price));
+  const discount = Number(item.discount ?? item.Discount ?? (originalPrice > price ? Math.round((1 - price / originalPrice) * 100) : 0));
+
+  return {
+    id: Number(item.id ?? item.ProductID),
+    name: item.name || item.ProductName || '',
+    slug: item.slug || item.Slug || '',
+    brand: item.brand || item.BrandName || '',
+    category: item.category || item.CategorySlug || '',
+    categoryName: item.categoryName || item.CategoryName || '',
+    description: item.description || item.FullDescription || item.ShortDescription || '',
+    specs: item.specs || item.Specifications || {},
+    warranty: item.warranty || item.Warranty || '',
+    rating: Number(item.rating ?? item.AvgRating ?? 4.6),
+    reviewCount: Number(item.reviewCount ?? item.ReviewCount ?? 0),
+    price,
+    originalPrice: originalPrice < price ? price : originalPrice,
+    discount,
+    image: item.image || images[0] || '',
+    images,
+    variants,
+    isFeatured: Boolean(item.isFeatured),
+    isOnSale: Boolean(item.isOnSale ?? discount > 0),
+    isHot: Boolean(item.isHot ?? discount >= 15),
+    tags: item.tags || [],
+  };
+}
+
+async function loadCatalog() {
+  if (catalogPromise) return catalogPromise;
+
+  catalogPromise = (async () => {
+    try {
+      const [categoryData, brandData, productData] = await Promise.all([
+        fetchJson('/categories'),
+        fetchJson('/brands'),
+        fetchJson('/products'),
+      ]);
+
+      categories = categoryData.map(normalizeCategory);
+      brands = brandData.slice();
+      products = productData.map(normalizeProduct).filter(Boolean);
+    } catch (error) {
+      console.warn('Không thể tải dữ liệu từ API, sử dụng dữ liệu mặc định.', error);
+    }
+
+    return { categories, brands, products };
+  })();
+
+  return catalogPromise;
+}
+
+let categories = [
   { id: 'dien-thoai', name: 'Điện thoại', icon: '📱', count: 12 },
   { id: 'may-tinh-bang', name: 'Máy tính bảng', icon: '📟', count: 4 },
   { id: 'phu-kien', name: 'Phụ kiện', icon: '🎧', count: 8 },
   { id: 'laptop', name: 'Laptop', icon: '💻', count: 4 },
 ];
 
-const brands = ['Apple', 'Samsung', 'Xiaomi', 'OPPO', 'vivo', 'Realme', 'Google', 'Sony', 'Dell', 'ASUS', 'Anker'];
+let brands = ['Apple', 'Samsung', 'Xiaomi', 'OPPO', 'vivo', 'Realme', 'Google', 'Sony', 'Dell', 'ASUS', 'Anker'];
 
-const products = [
+let products = [
   // ===== ĐIỆN THOẠI (SMARTPHONES) =====
   {
     id: 1,
@@ -1110,14 +1219,15 @@ function searchProducts(keyword) {
   const kw = keyword.toLowerCase().trim();
   if (!kw) return [];
   return products.filter(p =>
-    p.name.toLowerCase().includes(kw) ||
-    p.brand.toLowerCase().includes(kw) ||
-    p.description.toLowerCase().includes(kw)
+    (p.name || '').toLowerCase().includes(kw) ||
+    (p.brand || '').toLowerCase().includes(kw) ||
+    (p.description || '').toLowerCase().includes(kw)
   );
 }
 
 function getFeaturedProducts() {
-  return products.filter(p => p.isFeatured);
+  const featured = products.filter(p => p.isFeatured);
+  return featured.length ? featured : products.slice(0, 8);
 }
 
 function getSaleProducts() {

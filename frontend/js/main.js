@@ -219,8 +219,48 @@ function setActiveNav() {
   });
 }
 
+function renderNavigation() {
+  if (!Array.isArray(categories) || !categories.length) return;
+
+  const navContainer = document.querySelector('.header-nav .container');
+  if (navContainer) {
+    const categoryLinks = categories.map(c => `
+      <a href="products.html?cat=${c.id}" class="nav-item">${c.icon} ${c.name}</a>
+    `).join('');
+    navContainer.innerHTML = `
+      ${categoryLinks}
+      <a href="orders.html" class="nav-item">📦 Đơn hàng</a>
+      <a href="products.html" class="nav-item" style="margin-left:auto;background:rgba(255,255,255,.15)">🔥 Khuyến mãi</a>
+    `;
+  }
+
+  const mobileMenu = document.getElementById('mobile-menu');
+  if (mobileMenu) {
+    mobileMenu.querySelectorAll('.mobile-nav-item').forEach(item => item.remove());
+    const links = [
+      { href: 'index.html', label: '🏠 Trang chủ' },
+      ...categories.map(c => ({ href: `products.html?cat=${c.id}`, label: `${c.icon} ${c.name}` })),
+      { href: 'cart.html', label: '🛒 Giỏ hàng' },
+      { href: 'orders.html', label: '📦 Đơn hàng' },
+      { href: 'auth.html', label: '👤 Tài khoản' },
+    ];
+
+    links.forEach(link => {
+      const a = document.createElement('a');
+      a.href = link.href;
+      a.className = 'mobile-nav-item';
+      a.textContent = link.label;
+      mobileMenu.appendChild(a);
+    });
+  }
+}
+
 // Init on DOM ready
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  if (typeof loadCatalog === 'function') {
+    await loadCatalog();
+  }
+  renderNavigation();
   initCarousel();
   initSearch();
   initMobileMenu();

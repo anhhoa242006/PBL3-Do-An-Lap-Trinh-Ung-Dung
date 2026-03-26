@@ -125,7 +125,10 @@
 <script src="js/auth.js"></script>
 <script src="js/main.js"></script>
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', async () => {
+    if (typeof loadCatalog === 'function') {
+      await loadCatalog();
+    }
     const params = new URLSearchParams(window.location.search);
     const keyword = params.get('q') || '';
 

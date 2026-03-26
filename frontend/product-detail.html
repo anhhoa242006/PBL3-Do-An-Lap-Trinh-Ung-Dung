@@ -334,7 +334,10 @@
     `).join('');
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', async () => {
+    if (typeof loadCatalog === 'function') {
+      await loadCatalog();
+    }
     const id = getProductId();
     const product = getProductById(id);
 
@@ -437,7 +440,14 @@
     });
 
     // Specs table
-    document.getElementById('specs-table').innerHTML = Object.entries(product.specs).map(([key, val]) => `
+    const specs = typeof product.specs === 'string'
+      ? product.specs.split(',').map(s => s.trim()).filter(Boolean).reduce((acc, val, idx) => {
+          acc[`Thông tin ${idx + 1}`] = val;
+          return acc;
+        }, {})
+      : product.specs;
+
+    document.getElementById('specs-table').innerHTML = Object.entries(specs).map(([key, val]) => `
       <tr><td>${key}</td><td>${val}</td></tr>
     `).join('');
 
