@@ -186,9 +186,47 @@ function showTracking(orderId) {
   modal.classList.add('open');
 }
 
+// ---- API order helpers ----
+async function loadOrdersFromApi(token) {
+  try {
+    const res = await fetch(`${PHONESTORE_API_BASE}/orders`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    // Normalize API orders to local format
+    return data.map(o => ({
+      id: `${o.orderId}`,
+      userId: o.userId,
+      userInfo: { address: o.shippingAddress || '' },
+      items: (o.items || []).map(it => ({
+        name: it.productName || '',
+        image: it.image || 'https://placehold.co/80x80/1a1a2e/ffffff?text=SP',
+        price: it.unitPrice,
+        quantity: it.quantity,
+        color: it.color || '',
+        storage: it.storage || '',
+      })),
+      paymentMethod: o.paymentMethod || 'COD',
+      status: (o.status || 'pending').toLowerCase(),
+      statusHistory: [
+        { status: 'pending', label: 'Đã đặt hàng', time: o.orderDate },
+      ],
+      total: o.totalAmount || 0,
+      createdAt: o.orderDate,
+    }));
+  } catch (e) {
+    return null;
+  }
+}
+
 // ---- Page init ----
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   const user = Auth.getCurrentUser();
+  const token = Auth.getToken();
   const loginPrompt = document.getElementById('orders-login-prompt');
   const ordersSection = document.getElementById('orders-section');
   const ordersList = document.getElementById('orders-list');
@@ -202,11 +240,22 @@ document.addEventListener('DOMContentLoaded', () => {
   if (loginPrompt) loginPrompt.style.display = 'none';
   if (ordersSection) ordersSection.style.display = '';
 
-  // Seed demo orders for new users
-  Orders.seedDemoOrders(user.id);
+  let userOrders = [];
 
-  const userOrders = Orders.getUserOrders(user.id)
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  // Try loading from API first
+  if (token && typeof PHONESTORE_API_BASE !== 'undefined') {
+    const apiOrders = await loadOrdersFromApi(token);
+    if (apiOrders && apiOrders.length > 0) {
+      userOrders = apiOrders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    }
+  }
+
+  // Fallback to localStorage
+  if (userOrders.length === 0) {
+    Orders.seedDemoOrders(user.id);
+    userOrders = Orders.getUserOrders(user.id)
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  }
 
   if (ordersList) {
     if (userOrders.length === 0) {
