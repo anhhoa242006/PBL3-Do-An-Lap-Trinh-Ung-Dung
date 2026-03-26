@@ -7,7 +7,25 @@ const { sql, query } = require('./db');
 
 const app = express();
 
-app.use(cors({ origin: '*', credentials: false }));
+const defaultOrigins = [
+  'http://localhost:8000',
+  'http://127.0.0.1:8000',
+  'http://localhost:3000',
+];
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || defaultOrigins.join(','))
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(null, false);
+  },
+  credentials: false,
+}));
 app.use(express.json({ limit: '1mb' }));
 
 const PORT = process.env.PORT || 3000;
@@ -56,6 +74,7 @@ function parseSpecifications(specText) {
   }, {});
 }
 
+// Generate a placeholder image URL when the database does not provide assets.
 function makePlaceholder(text, size = 400, paletteIndex = 0) {
   const palette = ['1a1a2e', '0a3d62', '2c3e50', '4a90d9', '8e44ad', '27ae60'];
   const color = palette[paletteIndex % palette.length];
@@ -162,6 +181,7 @@ async function fetchProducts({ productId } = {}) {
 
   const products = Array.from(productMap.values()).map((product) => {
     if (!product.variants.length) {
+      console.warn(`Product ${product.id} has no variants. Using placeholder variant.`);
       product.variants = [{
         id: 0,
         color: '',
@@ -308,9 +328,10 @@ app.post('/api/auth/login', async (req, res) => {
     }
 
     let isValid = false;
+    const allowLegacyPasswords = process.env.ALLOW_LEGACY_PASSWORDS === 'true';
     if (user.PasswordHash && user.PasswordHash.startsWith('$2')) {
       isValid = await bcrypt.compare(password, user.PasswordHash);
-    } else {
+    } else if (allowLegacyPasswords) {
       isValid = password === user.PasswordHash;
       if (isValid) {
         const hashed = await bcrypt.hash(password, 10);
@@ -322,8 +343,8 @@ app.post('/api/auth/login', async (req, res) => {
               { name: 'userId', type: sql.Int, value: user.UserID },
             ],
           );
-        } catch (_) {
-          // Ignore hash upgrade failures
+        } catch (error) {
+          console.warn('Failed to upgrade password hash:', error);
         }
       }
     }

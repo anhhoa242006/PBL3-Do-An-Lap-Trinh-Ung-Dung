@@ -4,7 +4,9 @@
 
 const AUTH_KEY = 'phonestore_users';
 const SESSION_KEY = 'phonestore_current_user';
-const API_BASE = window.PHONESTORE_API_BASE || 'http://localhost:3000/api';
+const API_BASE = typeof window.getApiBase === 'function'
+  ? window.getApiBase()
+  : 'http://localhost:3000/api';
 
 const Auth = {
   getUsers() {

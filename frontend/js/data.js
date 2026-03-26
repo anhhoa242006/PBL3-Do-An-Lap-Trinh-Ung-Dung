@@ -6,6 +6,7 @@ const PHONESTORE_API_BASE = window.PHONESTORE_API_BASE
   || localStorage.getItem('phonestore_api_base')
   || 'http://localhost:3000/api';
 window.PHONESTORE_API_BASE = PHONESTORE_API_BASE;
+window.getApiBase = () => PHONESTORE_API_BASE;
 
 let catalogPromise = null;
 

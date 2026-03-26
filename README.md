@@ -15,6 +15,8 @@
 cd backend
 cp .env.example .env
 # cập nhật DB_* trong .env theo môi trường của bạn
+# cấu hình ALLOWED_ORIGINS nếu cần thay đổi domain frontend
+# nếu dùng dữ liệu seed có mật khẩu dạng plain-text, bật ALLOW_LEGACY_PASSWORDS=true
 npm install
 npm run start
 ```
@@ -32,7 +34,5 @@ Sau đó truy cập `http://localhost:8000/index.html`.
 
 ## Tài khoản mẫu
 Tài khoản mẫu được seed trong DB (xem `Database/SQLQuery1.sql`).
-Ví dụ:
-- Admin: `dangthienbinh6677@gmail.com` / `234567hash`
-- Staff: `nguyuenbaodoanh0210@gmail.com` / `123456hash`
-- Customer: `phamthilan09@gmail.com` / `Lanpham1123`
+
+Bạn có thể cập nhật lại thông tin đăng nhập trong database hoặc tạo tài khoản mới qua trang đăng ký.
