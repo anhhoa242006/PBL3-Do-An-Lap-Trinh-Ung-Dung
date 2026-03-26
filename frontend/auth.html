@@ -271,7 +271,7 @@
   }
 
   // ---- Login form ----
-  document.getElementById('login-form').addEventListener('submit', function(e) {
+  document.getElementById('login-form').addEventListener('submit', async function(e) {
     e.preventDefault();
     clearErrors('login-email-err', 'login-password-err', 'login-general-err');
 
@@ -286,7 +286,13 @@
 
     if (!valid) return;
 
-    const result = Auth.login(email, password);
+    const submitBtn = document.getElementById('login-submit-btn');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Đang đăng nhập...';
+
+    const result = await Auth.login(email, password);
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Đăng nhập';
     if (result.success) {
       Cart.showToast('Đăng nhập thành công! Chào ' + result.user.fullName);
       const redirect = new URLSearchParams(window.location.search).get('redirect') || 'index.html';
@@ -297,7 +303,7 @@
   });
 
   // ---- Register form ----
-  document.getElementById('register-form').addEventListener('submit', function(e) {
+  document.getElementById('register-form').addEventListener('submit', async function(e) {
     e.preventDefault();
     clearErrors('reg-name-err', 'reg-email-err', 'reg-phone-err', 'reg-password-err', 'reg-confirm-err', 'reg-terms-err', 'reg-general-err');
 
@@ -320,7 +326,13 @@
 
     if (!valid) return;
 
-    const result = Auth.register(name, email, phone, password);
+    const submitBtn = document.getElementById('reg-submit-btn');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Đang đăng ký...';
+
+    const result = await Auth.register(name, email, phone, password);
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Đăng ký';
     if (result.success) {
       Cart.showToast('Đăng ký thành công! Chào mừng ' + result.user.fullName);
       setTimeout(() => { window.location.href = 'index.html'; }, 800);

@@ -274,7 +274,41 @@
 <script src="js/auth.js"></script>
 <script src="js/main.js"></script>
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', async () => {
+    if (typeof loadCatalog === 'function') {
+      await loadCatalog();
+    }
+
+    const heroSlides = document.querySelectorAll('.hero-slide');
+    const heroProducts = getFeaturedProducts().slice(0, heroSlides.length);
+    heroSlides.forEach((slide, idx) => {
+      const product = heroProducts[idx];
+      if (!product) return;
+      const titleEl = slide.querySelector('.hero-title');
+      const nameParts = product.name.split(' ');
+      titleEl.textContent = '';
+      if (nameParts.length > 1) {
+        const firstLine = nameParts.slice(0, 2).join(' ');
+        const secondLine = nameParts.slice(2).join(' ');
+        titleEl.append(firstLine);
+        if (secondLine) {
+          titleEl.appendChild(document.createElement('br'));
+          titleEl.append(secondLine);
+        }
+      } else {
+        titleEl.textContent = product.name;
+      }
+      const heroDesc = product.description || product.categoryName || '';
+      slide.querySelector('.hero-subtitle').textContent = heroDesc.slice(0, 80);
+      slide.querySelector('.hero-price').textContent = formatPrice(product.price);
+      slide.querySelector('.hero-cta').href = `product-detail.html?id=${product.id}`;
+      const img = slide.querySelector('.hero-image img');
+      if (img) {
+        img.src = product.image;
+        img.alt = product.name;
+      }
+    });
+
     // Render categories
     const catGrid = document.getElementById('category-grid');
     catGrid.innerHTML = categories.map(c => `
