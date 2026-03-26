@@ -103,7 +103,7 @@ async function loadCatalog() {
       brands = brandData.slice();
       products = productData.map(normalizeProduct).filter(Boolean);
     } catch (error) {
-      console.warn('Không thể tải dữ liệu từ API, sử dụng dữ liệu mặc định.', error);
+      console.warn('Không thể tải dữ liệu từ API (/categories, /brands, /products), sử dụng dữ liệu mặc định.', error);
     }
 
     return { categories, brands, products };

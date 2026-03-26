@@ -181,7 +181,7 @@ async function fetchProducts({ productId } = {}) {
 
   const products = Array.from(productMap.values()).map((product) => {
     if (!product.variants.length) {
-      console.warn(`Product ${product.id} has no variants. Using placeholder variant.`);
+      console.warn(`Product ${product.id} (${product.name}) has no variants. Using placeholder variant.`);
       product.variants = [{
         id: 0,
         color: '',
