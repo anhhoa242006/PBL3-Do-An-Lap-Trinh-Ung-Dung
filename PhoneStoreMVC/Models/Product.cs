@@ -40,7 +40,7 @@ public class Product
 
     public bool IsActive { get; set; } = true;
 
-    public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public ICollection<ProductVariant> Variants { get; set; } = new List<ProductVariant>();
     public ICollection<Review> Reviews { get; set; } = new List<Review>();

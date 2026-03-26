@@ -76,7 +76,7 @@ public class CartController : ControllerBase
                 UserID = userId,
                 VariantID = request.VariantId,
                 Quantity = request.Quantity,
-                AddedAt = DateTime.Now,
+                AddedAt = DateTime.UtcNow,
             });
         }
 

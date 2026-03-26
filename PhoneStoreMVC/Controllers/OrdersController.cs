@@ -112,8 +112,8 @@ public class OrdersController : ControllerBase
         {
             var coupon = await _db.Coupons
                 .FirstOrDefaultAsync(c => c.Code == request.CouponCode && c.IsActive
-                    && (c.StartDate == null || c.StartDate <= DateTime.Now)
-                    && (c.EndDate == null || c.EndDate >= DateTime.Now));
+                    && (c.StartDate == null || c.StartDate <= DateTime.UtcNow)
+                    && (c.EndDate == null || c.EndDate >= DateTime.UtcNow));
 
             if (coupon != null)
             {
@@ -127,7 +127,7 @@ public class OrdersController : ControllerBase
         var order = new Models.Order
         {
             UserID = userId,
-            OrderDate = DateTime.Now,
+            OrderDate = DateTime.UtcNow,
             TotalAmount = total - discountAmount,
             DiscountAmount = discountAmount,
             ShippingFee = 0,

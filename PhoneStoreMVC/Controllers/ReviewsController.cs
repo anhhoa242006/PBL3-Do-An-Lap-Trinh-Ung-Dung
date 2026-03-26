@@ -47,7 +47,7 @@ public class ReviewsController : ControllerBase
             Rating = request.Rating,
             Comment = request.Comment,
             IsApproved = false,
-            CreatedAt = DateTime.Now,
+            CreatedAt = DateTime.UtcNow,
         };
 
         _db.Reviews.Add(review);

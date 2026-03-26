@@ -96,7 +96,7 @@ public class AuthController : ControllerBase
             PhoneNumber = request.Phone.Trim(),
             RoleID = roleId,
             IsActive = true,
-            CreatedAt = DateTime.Now,
+            CreatedAt = DateTime.UtcNow,
         };
 
         _db.Users.Add(user);

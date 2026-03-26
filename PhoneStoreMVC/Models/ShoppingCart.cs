@@ -21,5 +21,5 @@ public class ShoppingCart
 
     public int Quantity { get; set; } = 1;
 
-    public DateTime AddedAt { get; set; } = DateTime.Now;
+    public DateTime AddedAt { get; set; } = DateTime.UtcNow;
 }

@@ -24,8 +24,8 @@ public class CouponsController : ControllerBase
 
         var coupon = await _db.Coupons
             .FirstOrDefaultAsync(c => c.Code == request.Code.Trim() && c.IsActive
-                && (c.StartDate == null || c.StartDate <= DateTime.Now)
-                && (c.EndDate == null || c.EndDate >= DateTime.Now));
+                && (c.StartDate == null || c.StartDate <= DateTime.UtcNow)
+                && (c.EndDate == null || c.EndDate >= DateTime.UtcNow));
 
         if (coupon == null)
             return Ok(new CouponValidateResponse { Success = false, Message = "Mã giảm giá không hợp lệ hoặc đã hết hạn." });
