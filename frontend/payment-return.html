@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kết quả thanh toán - PhoneStore</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📱</text></svg>" />
+  <style>
+    .payment-result-wrap {
+      max-width: 500px;
+      margin: 80px auto;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(0,0,0,.1);
+      padding: 48px 40px;
+      text-align: center;
+    }
+    .payment-result-icon { font-size: 72px; margin-bottom: 16px; }
+    .payment-result-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .payment-result-title.success { color: #27ae60; }
+    .payment-result-title.fail { color: #e74c3c; }
+    .payment-result-desc { color: #666; font-size: 15px; margin-bottom: 24px; }
+    .payment-result-info {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 24px;
+      text-align: left;
+      font-size: 14px;
+      line-height: 1.8;
+    }
+    .payment-result-info strong { color: #333; }
+    .payment-result-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .btn-primary-sm {
+      background: var(--primary, #a80016);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 24px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn-outline-sm {
+      background: #fff;
+      color: #333;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 10px 24px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .spinner {
+      width: 48px; height: 48px;
+      border: 5px solid #eee;
+      border-top-color: var(--primary, #a80016);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 20px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-top">
+    <div class="container">
+      <a href="index.html" class="logo">
+        <div class="logo-icon">📱</div>
+        <div class="logo-text">Phone<span>Store</span></div>
+      </a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="payment-result-wrap" id="result-wrap">
+    <div class="spinner"></div>
+    <p style="color:#666">Đang xử lý kết quả thanh toán...</p>
+  </div>
+</main>
+
+<script>
+(function () {
+  const params = new URLSearchParams(window.location.search);
+  const wrap = document.getElementById('result-wrap');
+
+  // ── Determine payment provider and result ─────────────────────────────────
+  let orderId = null;
+  let isSuccess = false;
+  let provider = '';
+  let txnCode = '';
+  let errorMsg = '';
+
+  // VNPay return params: vnp_ResponseCode=00 means success
+  if (params.has('vnp_TxnRef')) {
+    provider = 'VNPay';
+    orderId = params.get('vnp_TxnRef');
+    isSuccess = params.get('vnp_ResponseCode') === '00';
+    txnCode = params.get('vnp_TransactionNo') || '';
+    errorMsg = isSuccess ? '' : `Mã lỗi: ${params.get('vnp_ResponseCode')}`;
+  }
+  // MoMo return params: resultCode=0 means success
+  else if (params.has('orderId') && params.has('resultCode')) {
+    provider = 'MoMo';
+    orderId = params.get('orderId');
+    isSuccess = params.get('resultCode') === '0';
+    txnCode = params.get('transId') || '';
+    errorMsg = isSuccess ? '' : params.get('message') || 'Thanh toán thất bại';
+  }
+  // Generic (COD success redirect)
+  else if (params.has('order_id')) {
+    provider = 'COD';
+    orderId = params.get('order_id');
+    isSuccess = true;
+  }
+
+  // ── Verify with backend (VNPay / MoMo) ───────────────────────────────────
+  async function verifyWithBackend() {
+    if (provider === 'VNPay') {
+      try {
+        const res = await fetch(`/api/payment/vnpay-return?${params.toString()}`);
+        if (!res.ok) { isSuccess = false; }
+      } catch { /* ignore, rely on client-side result */ }
+    }
+  }
+
+  async function render() {
+    if (provider === 'VNPay' || provider === 'MoMo') {
+      await verifyWithBackend();
+    }
+
+    const orderIdDisplay = orderId ? `#${orderId}` : '';
+
+    if (isSuccess) {
+      wrap.innerHTML = `
+        <div class="payment-result-icon">🎉</div>
+        <div class="payment-result-title success">Thanh toán thành công!</div>
+        <div class="payment-result-desc">Đơn hàng của bạn đã được xác nhận.</div>
+        <div class="payment-result-info">
+          ${orderId ? `<div><strong>Mã đơn hàng:</strong> ${orderIdDisplay}</div>` : ''}
+          ${provider ? `<div><strong>Phương thức:</strong> ${provider}</div>` : ''}
+          ${txnCode ? `<div><strong>Mã giao dịch:</strong> ${txnCode}</div>` : ''}
+          <div><strong>Thời gian:</strong> ${new Date().toLocaleString('vi-VN')}</div>
+        </div>
+        <div class="payment-result-actions">
+          <a href="orders.html" class="btn-primary-sm">📦 Xem đơn hàng</a>
+          <a href="index.html" class="btn-outline-sm">🏠 Về trang chủ</a>
+        </div>
+      `;
+    } else {
+      wrap.innerHTML = `
+        <div class="payment-result-icon">❌</div>
+        <div class="payment-result-title fail">Thanh toán thất bại</div>
+        <div class="payment-result-desc">Giao dịch không thành công. Vui lòng thử lại.</div>
+        <div class="payment-result-info">
+          ${orderId ? `<div><strong>Mã đơn hàng:</strong> ${orderIdDisplay}</div>` : ''}
+          ${provider ? `<div><strong>Phương thức:</strong> ${provider}</div>` : ''}
+          ${errorMsg ? `<div><strong>Lý do:</strong> ${errorMsg}</div>` : ''}
+        </div>
+        <div class="payment-result-actions">
+          ${orderId ? `<a href="checkout.html?retry=${orderId}" class="btn-primary-sm">🔄 Thử lại</a>` : ''}
+          <a href="cart.html" class="btn-outline-sm">🛒 Giỏ hàng</a>
+          <a href="index.html" class="btn-outline-sm">🏠 Trang chủ</a>
+        </div>
+      `;
+    }
+  }
+
+  render();
+})();
+</script>
+
+</body>
+</html>

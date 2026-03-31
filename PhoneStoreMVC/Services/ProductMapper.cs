@@ -20,6 +20,9 @@ public static class ProductMapper
         if (imageUrl.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
             imageUrl.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
             return imageUrl;
+        // Local uploaded image (e.g. /uploads/abc.jpg)
+        if (imageUrl.StartsWith("/", StringComparison.Ordinal))
+            return imageUrl;
         return MakePlaceholder(productName, size, index);
     }
 

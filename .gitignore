@@ -6,3 +6,7 @@ PhoneStoreMVC/bin/
 PhoneStoreMVC/obj/
 PhoneStoreMVC/*.user
 PhoneStoreMVC/.vs/
+
+# Uploaded images (keep directory via .gitkeep)
+PhoneStoreMVC/wwwroot/uploads/*
+!PhoneStoreMVC/wwwroot/uploads/.gitkeep

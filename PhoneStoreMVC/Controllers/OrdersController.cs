@@ -40,6 +40,7 @@ public class OrdersController : ControllerBase
             .Include(o => o.OrderDetails)
                 .ThenInclude(od => od.Variant)
                     .ThenInclude(v => v!.Product)
+            .Include(o => o.StatusHistories)
             .OrderByDescending(o => o.OrderDate)
             .ToListAsync();
 
@@ -56,6 +57,7 @@ public class OrdersController : ControllerBase
             .Include(o => o.OrderDetails)
                 .ThenInclude(od => od.Variant)
                     .ThenInclude(v => v!.Product)
+            .Include(o => o.StatusHistories)
             .FirstOrDefaultAsync(o => o.OrderID == id);
 
         if (order == null)
@@ -140,6 +142,15 @@ public class OrdersController : ControllerBase
         _db.Orders.Add(order);
         await _db.SaveChangesAsync();
 
+        // Add initial status history
+        _db.OrderStatusHistories.Add(new Models.OrderStatusHistory
+        {
+            OrderID = order.OrderID,
+            Status = "Pending",
+            Note = "Đơn hàng được tạo",
+            CreatedAt = DateTime.UtcNow,
+        });
+
         foreach (var detail in details)
         {
             detail.OrderID = order.OrderID;
@@ -162,6 +173,7 @@ public class OrdersController : ControllerBase
             .Include(o => o.OrderDetails)
                 .ThenInclude(od => od.Variant)
                     .ThenInclude(v => v!.Product)
+            .Include(o => o.StatusHistories)
             .FirstAsync(o => o.OrderID == order.OrderID);
 
         return StatusCode(201, new { success = true, order = MapOrder(created) });
@@ -182,6 +194,15 @@ public class OrdersController : ControllerBase
             PaymentMethod = order.PaymentMethod,
             Status = order.Status,
             Notes = order.Notes,
+            StatusHistories = order.StatusHistories
+                .OrderBy(h => h.CreatedAt)
+                .Select(h => new OrderStatusHistoryDto
+                {
+                    HistoryId = h.HistoryID,
+                    Status = h.Status,
+                    Note = h.Note,
+                    CreatedAt = h.CreatedAt,
+                }).ToList(),
             Items = order.OrderDetails.Select(od => new OrderDetailDto
             {
                 OrderDetailId = od.OrderDetailID,

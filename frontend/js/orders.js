@@ -130,6 +130,11 @@ function renderOrderCard(order) {
     </div>
   `).join('');
 
+  const paymentBadge = order.paymentMethod === 'VNPay' ? '🏦 VNPay'
+                     : order.paymentMethod === 'MoMo'  ? '📱 MoMo'
+                     : order.paymentMethod === 'COD'   ? '💵 COD'
+                     : order.paymentMethod || 'COD';
+
   return `
     <div class="order-card" id="order-${order.id}">
       <div class="order-card-header">
@@ -141,7 +146,7 @@ function renderOrderCard(order) {
       </div>
       <div class="order-items">${itemsHtml}</div>
       <div class="order-card-footer">
-        <div class="order-payment">Thanh toán: ${order.paymentMethod}</div>
+        <div class="order-payment">Thanh toán: ${paymentBadge}</div>
         <div class="order-total">Tổng cộng: <strong>${formatPrice(order.total)}</strong></div>
       </div>
       <button class="order-track-btn" onclick="showTracking('${order.id}')">📍 Theo dõi đơn hàng</button>
@@ -169,18 +174,24 @@ function showTracking(orderId) {
             <div class="track-info">
               <div class="track-label">${s.icon} ${s.label}</div>
               ${histEntry ? `<div class="track-time">${formatDate(histEntry.time)}</div>` : ''}
+              ${histEntry && histEntry.note ? `<div class="track-note" style="font-size:12px;color:#888;">${histEntry.note}</div>` : ''}
             </div>
           </div>
         `;
       }).join('');
+
+  const trackingExtra = order.trackingNumber
+    ? `<div class="tracking-address"><strong>Mã vận đơn:</strong> ${order.trackingNumber}</div>`
+    : '';
 
   const modal = document.getElementById('tracking-modal');
   const modalContent = document.getElementById('tracking-content');
   modalContent.innerHTML = `
     <h3 class="tracking-title">Theo dõi đơn hàng #${order.id}</h3>
     <div class="tracking-steps">${stepsHtml}</div>
+    ${trackingExtra}
     <div class="tracking-address">
-      <strong>Giao đến:</strong> ${order.userInfo.address}
+      <strong>Giao đến:</strong> ${order.userInfo.address || 'Không có thông tin'}
     </div>
   `;
   modal.classList.add('open');
@@ -198,26 +209,42 @@ async function loadOrdersFromApi(token) {
     if (!res.ok) return null;
     const data = await res.json();
     // Normalize API orders to local format
-    return data.map(o => ({
-      id: `${o.orderId}`,
-      userId: o.userId,
-      userInfo: { address: o.shippingAddress || '' },
-      items: (o.items || []).map(it => ({
-        name: it.productName || '',
-        image: it.image || 'https://placehold.co/80x80/1a1a2e/ffffff?text=SP',
-        price: it.unitPrice,
-        quantity: it.quantity,
-        color: it.color || '',
-        storage: it.storage || '',
-      })),
-      paymentMethod: o.paymentMethod || 'COD',
-      status: (o.status || 'pending').toLowerCase(),
-      statusHistory: [
-        { status: 'pending', label: 'Đã đặt hàng', time: o.orderDate },
-      ],
-      total: o.totalAmount || 0,
-      createdAt: o.orderDate,
-    }));
+    return data.map(o => {
+      // Build status history from API (prefer real history over single entry)
+      let statusHistory = [];
+      if (o.statusHistories && o.statusHistories.length > 0) {
+        statusHistory = o.statusHistories.map(h => ({
+          status: h.status.toLowerCase(),
+          label: getStatusLabel(h.status.toLowerCase()).label,
+          time: h.createdAt,
+          note: h.note || '',
+        }));
+      } else {
+        statusHistory = [
+          { status: 'pending', label: 'Đã đặt hàng', time: o.orderDate, note: '' },
+        ];
+      }
+
+      return {
+        id: `${o.orderId}`,
+        userId: o.userId,
+        userInfo: { address: o.shippingAddress || '' },
+        items: (o.items || []).map(it => ({
+          name: it.productName || '',
+          image: it.image || 'https://placehold.co/80x80/1a1a2e/ffffff?text=SP',
+          price: it.unitPrice,
+          quantity: it.quantity,
+          color: it.color || '',
+          storage: it.storage || '',
+        })),
+        paymentMethod: o.paymentMethod || 'COD',
+        status: (o.status || 'pending').toLowerCase(),
+        statusHistory,
+        trackingNumber: o.trackingNumber || '',
+        total: o.totalAmount || 0,
+        createdAt: o.orderDate,
+      };
+    });
   } catch (e) {
     return null;
   }

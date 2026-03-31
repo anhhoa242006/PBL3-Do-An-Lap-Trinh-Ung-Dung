@@ -101,13 +101,37 @@ public class AdminController : ControllerBase
         if (!validStatuses.Contains(request.Status))
             return BadRequest(ApiResponse<object>.Fail("Trạng thái không hợp lệ."));
 
+        var oldStatus = order.Status;
         order.Status = request.Status;
         if (!string.IsNullOrWhiteSpace(request.TrackingNumber))
             order.TrackingNumber = request.TrackingNumber;
 
+        // Record status history
+        if (oldStatus != request.Status)
+        {
+            _db.OrderStatusHistories.Add(new Models.OrderStatusHistory
+            {
+                OrderID = id,
+                Status = request.Status,
+                Note = request.Note ?? StatusChangeNote(request.Status, request.TrackingNumber),
+                CreatedAt = DateTime.UtcNow,
+            });
+        }
+
         await _db.SaveChangesAsync();
         return Ok(new { success = true, orderId = id, status = order.Status });
     }
+
+    private static string StatusChangeNote(string status, string? trackingNumber) => status switch
+    {
+        "Confirmed" => "Đơn hàng đã được xác nhận",
+        "Shipping"  => string.IsNullOrEmpty(trackingNumber)
+                           ? "Đơn hàng đang được giao"
+                           : $"Đơn hàng đang giao. Mã vận đơn: {trackingNumber}",
+        "Delivered" => "Đơn hàng đã được giao thành công",
+        "Cancelled" => "Đơn hàng đã bị hủy",
+        _           => $"Trạng thái thay đổi sang {status}",
+    };
 
     // GET /api/admin/products
     [HttpGet("products")]
@@ -220,4 +244,245 @@ public class AdminController : ControllerBase
         await _db.SaveChangesAsync();
         return Ok(new { success = true });
     }
+
+    // ── Product CRUD ──────────────────────────────────────────────────────────
+
+    // POST /api/admin/products
+    [HttpPost("products")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> CreateProduct([FromBody] CreateProductRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.ProductName))
+            return BadRequest(ApiResponse<object>.Fail("Tên sản phẩm không được để trống."));
+
+        var slug = request.Slug ?? GenerateSlug(request.ProductName);
+
+        if (await _db.Products.AnyAsync(p => p.Slug == slug))
+            return Conflict(ApiResponse<object>.Fail("Slug đã tồn tại. Vui lòng dùng slug khác."));
+
+        var product = new Models.Product
+        {
+            ProductName = request.ProductName.Trim(),
+            Slug = slug,
+            ShortDescription = request.ShortDescription,
+            FullDescription = request.FullDescription,
+            Specifications = request.Specifications,
+            Warranty = request.Warranty,
+            CategoryID = request.CategoryId,
+            BrandID = request.BrandId,
+            IsActive = request.IsActive,
+            CreatedAt = DateTime.UtcNow,
+        };
+
+        _db.Products.Add(product);
+        await _db.SaveChangesAsync();
+
+        foreach (var v in request.Variants)
+        {
+            _db.ProductVariants.Add(new Models.ProductVariant
+            {
+                ProductID = product.ProductID,
+                Color = v.Color,
+                Storage = v.Storage,
+                Price = v.Price,
+                OriginalPrice = v.OriginalPrice,
+                StockQuantity = v.StockQuantity,
+                SKU = v.SKU,
+                ImageURL = v.ImageURL,
+                IsDefault = v.IsDefault,
+            });
+        }
+        await _db.SaveChangesAsync();
+
+        return StatusCode(201, new { success = true, productId = product.ProductID, slug = product.Slug });
+    }
+
+    // PUT /api/admin/products/{id}
+    [HttpPut("products/{id:int}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> UpdateProduct(int id, [FromBody] UpdateProductRequest request)
+    {
+        var product = await _db.Products.FindAsync(id);
+        if (product == null)
+            return NotFound(ApiResponse<object>.Fail("Không tìm thấy sản phẩm."));
+
+        if (request.ProductName != null) product.ProductName = request.ProductName.Trim();
+        if (request.Slug != null)
+        {
+            if (await _db.Products.AnyAsync(p => p.Slug == request.Slug && p.ProductID != id))
+                return Conflict(ApiResponse<object>.Fail("Slug đã tồn tại."));
+            product.Slug = request.Slug;
+        }
+        if (request.ShortDescription != null) product.ShortDescription = request.ShortDescription;
+        if (request.FullDescription != null)  product.FullDescription  = request.FullDescription;
+        if (request.Specifications != null)   product.Specifications   = request.Specifications;
+        if (request.Warranty != null)         product.Warranty         = request.Warranty;
+        if (request.CategoryId.HasValue)      product.CategoryID       = request.CategoryId;
+        if (request.BrandId.HasValue)         product.BrandID          = request.BrandId;
+        if (request.IsActive.HasValue)        product.IsActive         = request.IsActive.Value;
+
+        await _db.SaveChangesAsync();
+        return Ok(new { success = true });
+    }
+
+    // DELETE /api/admin/products/{id}
+    [HttpDelete("products/{id:int}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> DeleteProduct(int id)
+    {
+        var product = await _db.Products.FindAsync(id);
+        if (product == null)
+            return NotFound(ApiResponse<object>.Fail("Không tìm thấy sản phẩm."));
+
+        // Soft delete
+        product.IsActive = false;
+        await _db.SaveChangesAsync();
+        return Ok(new { success = true });
+    }
+
+    // POST /api/admin/products/{id}/variants
+    [HttpPost("products/{id:int}/variants")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> AddVariant(int id, [FromBody] CreateVariantRequest request)
+    {
+        if (!await _db.Products.AnyAsync(p => p.ProductID == id))
+            return NotFound(ApiResponse<object>.Fail("Không tìm thấy sản phẩm."));
+
+        var variant = new Models.ProductVariant
+        {
+            ProductID = id,
+            Color = request.Color,
+            Storage = request.Storage,
+            Price = request.Price,
+            OriginalPrice = request.OriginalPrice,
+            StockQuantity = request.StockQuantity,
+            SKU = request.SKU,
+            ImageURL = request.ImageURL,
+            IsDefault = request.IsDefault,
+        };
+        _db.ProductVariants.Add(variant);
+        await _db.SaveChangesAsync();
+
+        return StatusCode(201, new { success = true, variantId = variant.VariantID });
+    }
+
+    // PUT /api/admin/variants/{id}
+    [HttpPut("variants/{id:int}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> UpdateVariant(int id, [FromBody] UpdateVariantRequest request)
+    {
+        var variant = await _db.ProductVariants.FindAsync(id);
+        if (variant == null)
+            return NotFound(ApiResponse<object>.Fail("Không tìm thấy biến thể."));
+
+        if (request.Color != null)          variant.Color         = request.Color;
+        if (request.Storage != null)        variant.Storage       = request.Storage;
+        if (request.Price.HasValue)         variant.Price         = request.Price.Value;
+        if (request.OriginalPrice.HasValue) variant.OriginalPrice = request.OriginalPrice;
+        if (request.StockQuantity.HasValue) variant.StockQuantity = request.StockQuantity.Value;
+        if (request.SKU != null)            variant.SKU           = request.SKU;
+        if (request.ImageURL != null)       variant.ImageURL      = request.ImageURL;
+        if (request.IsDefault.HasValue)     variant.IsDefault     = request.IsDefault.Value;
+
+        await _db.SaveChangesAsync();
+        return Ok(new { success = true });
+    }
+
+    // DELETE /api/admin/variants/{id}
+    [HttpDelete("variants/{id:int}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> DeleteVariant(int id)
+    {
+        var variant = await _db.ProductVariants.FindAsync(id);
+        if (variant == null)
+            return NotFound(ApiResponse<object>.Fail("Không tìm thấy biến thể."));
+
+        _db.ProductVariants.Remove(variant);
+        await _db.SaveChangesAsync();
+        return Ok(new { success = true });
+    }
+
+    // PATCH /api/admin/users/{id}/toggle-active
+    [HttpPatch("users/{id:int}/toggle-active")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> ToggleUserActive(int id)
+    {
+        var user = await _db.Users.FindAsync(id);
+        if (user == null)
+            return NotFound(ApiResponse<object>.Fail("Không tìm thấy người dùng."));
+
+        user.IsActive = !user.IsActive;
+        await _db.SaveChangesAsync();
+        return Ok(new { success = true, isActive = user.IsActive });
+    }
+
+    // PATCH /api/admin/users/{id}/role
+    [HttpPatch("users/{id:int}/role")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> ChangeUserRole(int id, [FromBody] ChangeRoleRequest request)
+    {
+        var user = await _db.Users.FindAsync(id);
+        if (user == null)
+            return NotFound(ApiResponse<object>.Fail("Không tìm thấy người dùng."));
+
+        var role = await _db.Roles.FirstOrDefaultAsync(r => r.RoleName == request.RoleName);
+        if (role == null)
+            return BadRequest(ApiResponse<object>.Fail("Tên role không hợp lệ."));
+
+        user.RoleID = role.RoleID;
+        await _db.SaveChangesAsync();
+        return Ok(new { success = true, role = role.RoleName });
+    }
+
+    // GET /api/admin/orders/{id}/history
+    [HttpGet("orders/{id:int}/history")]
+    public async Task<IActionResult> GetOrderHistory(int id)
+    {
+        var history = await _db.OrderStatusHistories
+            .Where(h => h.OrderID == id)
+            .OrderBy(h => h.CreatedAt)
+            .Select(h => new OrderStatusHistoryDto
+            {
+                HistoryId = h.HistoryID,
+                Status = h.Status,
+                Note = h.Note,
+                CreatedAt = h.CreatedAt,
+            })
+            .ToListAsync();
+
+        return Ok(history);
+    }
+
+    private static string GenerateSlug(string name)
+    {
+        var slug = name.ToLowerInvariant().Replace(" ", "-");
+
+        // Vietnamese character → ASCII map (includes đ)
+        var map = new Dictionary<string, string>
+        {
+            ["đ"] = "d",
+            ["à|á|â|ã|ả|ă|ặ|ắ|ằ|ẳ|ẵ|ấ|ầ|ẩ|ẫ|ậ"] = "a",
+            ["è|é|ê|ẹ|ẻ|ẽ|ế|ề|ệ|ể|ễ"] = "e",
+            ["ì|í|ỉ|ĩ|ị"] = "i",
+            ["ò|ó|ô|õ|ọ|ỏ|ơ|ớ|ờ|ở|ỡ|ợ|ố|ồ|ộ|ổ|ỗ"] = "o",
+            ["ù|ú|ụ|ủ|ũ|ư|ứ|ừ|ử|ữ|ự"] = "u",
+            ["ỳ|ý|ỵ|ỷ|ỹ"] = "y",
+        };
+
+        foreach (var kv in map)
+        {
+            foreach (var ch in kv.Key.Split('|'))
+                slug = slug.Replace(ch, kv.Value);
+        }
+
+        // Remove any remaining non-alphanumeric chars except hyphen
+        slug = System.Text.RegularExpressions.Regex.Replace(slug, @"[^a-z0-9\-]", "");
+        slug = System.Text.RegularExpressions.Regex.Replace(slug, @"-{2,}", "-").Trim('-');
+        return slug;
+    }
+}
+
+public class ChangeRoleRequest
+{
+    public string RoleName { get; set; } = string.Empty;
 }

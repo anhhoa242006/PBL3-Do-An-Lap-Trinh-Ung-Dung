@@ -126,12 +126,12 @@
                 <div class="payment-desc">Trả tiền mặt khi nhận hàng tận nơi</div>
               </div>
             </label>
-            <label class="payment-option" onclick="selectPayment('bank', this)">
-              <input type="radio" name="payment" value="bank" class="payment-radio">
+            <label class="payment-option" onclick="selectPayment('vnpay', this)">
+              <input type="radio" name="payment" value="vnpay" class="payment-radio">
               <span class="payment-icon">🏦</span>
               <div>
-                <div class="payment-name">Chuyển khoản ngân hàng</div>
-                <div class="payment-desc">Chuyển khoản qua tài khoản ngân hàng</div>
+                <div class="payment-name">VNPay</div>
+                <div class="payment-desc">Thanh toán qua cổng VNPay (ATM, Visa, MasterCard, QR…)</div>
               </div>
             </label>
             <label class="payment-option" onclick="selectPayment('momo', this)">
@@ -140,14 +140,6 @@
               <div>
                 <div class="payment-name">Ví MoMo</div>
                 <div class="payment-desc">Thanh toán qua ví điện tử MoMo</div>
-              </div>
-            </label>
-            <label class="payment-option" onclick="selectPayment('card', this)">
-              <input type="radio" name="payment" value="card" class="payment-radio">
-              <span class="payment-icon">💳</span>
-              <div>
-                <div class="payment-name">Thẻ tín dụng / Ghi nợ</div>
-                <div class="payment-desc">Visa, MasterCard, JCB, American Express</div>
               </div>
             </label>
           </div>
@@ -317,7 +309,7 @@
     }
 
     const paymentEl = document.querySelector('input[name="payment"]:checked');
-    const paymentMethod = paymentEl ? paymentEl.value.toUpperCase() : 'COD';
+    const paymentValue = paymentEl ? paymentEl.value : 'cod'; // lowercase: 'cod', 'vnpay', 'momo'
     const address = [
       document.getElementById('address').value.trim(),
       document.getElementById('district').value.trim(),
@@ -338,6 +330,11 @@
       quantity: item.quantity,
     })).filter(i => i.variantId > 0);
 
+    // Normalise payment method name for backend
+    const paymentMethodName = paymentValue === 'vnpay' ? 'VNPay'
+                            : paymentValue === 'momo'  ? 'MoMo'
+                            : 'COD';
+
     // If logged in, use API; otherwise create order locally
     if (user && token && orderItems.length > 0) {
       try {
@@ -349,17 +346,55 @@
           },
           body: JSON.stringify({
             shippingAddress: address,
-            paymentMethod,
+            paymentMethod: paymentMethodName,
             notes,
             items: orderItems,
           }),
         });
         const data = await res.json();
         if (res.ok && data.success) {
-          const orderNum = data.order?.orderId || 'PS' + Date.now().toString().slice(-6);
-          document.getElementById('modal-order-num').textContent = `Mã đơn hàng: #${orderNum}`;
+          const orderId = data.order?.orderId;
           Cart.clearCart();
-          document.getElementById('success-modal').classList.add('open');
+
+          // Handle online payment redirect
+          if (paymentValue === 'vnpay' && orderId) {
+            btn.textContent = 'Đang chuyển đến VNPay...';
+            const payRes = await fetch(`${PHONESTORE_API_BASE}/payment/vnpay/create`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+              body: JSON.stringify({ orderId }),
+            });
+            const payData = await payRes.json();
+            if (payData.success && payData.payUrl) {
+              window.location.href = payData.payUrl;
+              return;
+            } else {
+              Cart.showToast('Không thể khởi tạo thanh toán VNPay. Đơn hàng đã được lưu, vui lòng thanh toán sau.', 'error');
+              document.getElementById('modal-order-num').textContent = `Mã đơn hàng: #${orderId}`;
+              document.getElementById('success-modal').classList.add('open');
+            }
+          } else if (paymentValue === 'momo' && orderId) {
+            btn.textContent = 'Đang chuyển đến MoMo...';
+            const payRes = await fetch(`${PHONESTORE_API_BASE}/payment/momo/create`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+              body: JSON.stringify({ orderId }),
+            });
+            const payData = await payRes.json();
+            if (payData.success && payData.payUrl) {
+              window.location.href = payData.payUrl;
+              return;
+            } else {
+              Cart.showToast('Không thể khởi tạo thanh toán MoMo. Đơn hàng đã được lưu, vui lòng thanh toán sau.', 'error');
+              document.getElementById('modal-order-num').textContent = `Mã đơn hàng: #${orderId}`;
+              document.getElementById('success-modal').classList.add('open');
+            }
+          } else {
+            // COD – show success modal
+            const orderNum = orderId || 'PS' + Date.now().toString().slice(-6);
+            document.getElementById('modal-order-num').textContent = `Mã đơn hàng: #${orderNum}`;
+            document.getElementById('success-modal').classList.add('open');
+          }
         } else {
           Cart.showToast(data.message || 'Đặt hàng thất bại. Vui lòng thử lại.', 'error');
         }
