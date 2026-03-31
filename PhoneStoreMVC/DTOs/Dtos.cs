@@ -143,6 +143,7 @@ public class OrderDto
     public string? PaymentMethod { get; set; }
     public string Status { get; set; } = string.Empty;
     public string? Notes { get; set; }
+    public List<OrderStatusHistoryDto> StatusHistories { get; set; } = new();
     public List<OrderDetailDto> Items { get; set; } = new();
 }
 
@@ -193,6 +194,7 @@ public class UpdateOrderStatusRequest
 {
     public string Status { get; set; } = string.Empty;
     public string? TrackingNumber { get; set; }
+    public string? Note { get; set; }
 }
 
 public class ApiResponse<T>
@@ -206,4 +208,92 @@ public class ApiResponse<T>
 
     public static ApiResponse<T> Fail(string message) =>
         new() { Success = false, Message = message };
+}
+
+// ── Payment ───────────────────────────────────────────────────────────────────
+
+public class PaymentCreateRequest
+{
+    public int OrderId { get; set; }
+}
+
+public class MoMoIpnRequest
+{
+    public string PartnerCode  { get; set; } = string.Empty;
+    public string OrderId      { get; set; } = string.Empty;
+    public string RequestId    { get; set; } = string.Empty;
+    public string Amount       { get; set; } = string.Empty;
+    public string OrderInfo    { get; set; } = string.Empty;
+    public string OrderType    { get; set; } = string.Empty;
+    public string TransId      { get; set; } = string.Empty;
+    public string ResultCode   { get; set; } = string.Empty;
+    public string Message      { get; set; } = string.Empty;
+    public string PayType      { get; set; } = string.Empty;
+    public string ResponseTime { get; set; } = string.Empty;
+    public string ExtraData    { get; set; } = string.Empty;
+    public string Signature    { get; set; } = string.Empty;
+    public string AccessKey    { get; set; } = string.Empty;
+}
+
+// ── Order Status History ──────────────────────────────────────────────────────
+
+public class OrderStatusHistoryDto
+{
+    public int HistoryId { get; set; }
+    public string Status { get; set; } = string.Empty;
+    public string? Note { get; set; }
+    public DateTime CreatedAt { get; set; }
+}
+
+// ── Admin Product CRUD ────────────────────────────────────────────────────────
+
+public class CreateProductRequest
+{
+    public string ProductName { get; set; } = string.Empty;
+    public string? Slug { get; set; }
+    public string? ShortDescription { get; set; }
+    public string? FullDescription { get; set; }
+    public string? Specifications { get; set; }
+    public string? Warranty { get; set; }
+    public int? CategoryId { get; set; }
+    public int? BrandId { get; set; }
+    public bool IsActive { get; set; } = true;
+    public List<CreateVariantRequest> Variants { get; set; } = new();
+}
+
+public class UpdateProductRequest
+{
+    public string? ProductName { get; set; }
+    public string? Slug { get; set; }
+    public string? ShortDescription { get; set; }
+    public string? FullDescription { get; set; }
+    public string? Specifications { get; set; }
+    public string? Warranty { get; set; }
+    public int? CategoryId { get; set; }
+    public int? BrandId { get; set; }
+    public bool? IsActive { get; set; }
+}
+
+public class CreateVariantRequest
+{
+    public string? Color { get; set; }
+    public string? Storage { get; set; }
+    public decimal Price { get; set; }
+    public decimal? OriginalPrice { get; set; }
+    public int StockQuantity { get; set; }
+    public string? SKU { get; set; }
+    public string? ImageURL { get; set; }
+    public bool IsDefault { get; set; }
+}
+
+public class UpdateVariantRequest
+{
+    public string? Color { get; set; }
+    public string? Storage { get; set; }
+    public decimal? Price { get; set; }
+    public decimal? OriginalPrice { get; set; }
+    public int? StockQuantity { get; set; }
+    public string? SKU { get; set; }
+    public string? ImageURL { get; set; }
+    public bool? IsDefault { get; set; }
 }

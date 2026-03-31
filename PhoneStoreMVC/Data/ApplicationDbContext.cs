@@ -19,6 +19,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<UserAddress> UserAddresses { get; set; }
     public DbSet<Order> Orders { get; set; }
     public DbSet<OrderDetail> OrderDetails { get; set; }
+    public DbSet<OrderStatusHistory> OrderStatusHistories { get; set; }
     public DbSet<Review> Reviews { get; set; }
     public DbSet<ShoppingCart> ShoppingCarts { get; set; }
     public DbSet<Coupon> Coupons { get; set; }
@@ -62,3 +63,43 @@ public class ApplicationDbContext : DbContext
             .IsUnique();
     }
 }
+
+public static class DbSeeder
+{
+    /// <summary>
+    /// Ensures the database is created and seeds default roles + admin account.
+    /// Safe to call on every startup (idempotent).
+    /// </summary>
+    public static async Task SeedAsync(ApplicationDbContext db)
+    {
+        await db.Database.EnsureCreatedAsync();
+
+        // ── Roles ──────────────────────────────────────────────────
+        var roleNames = new[] { "Admin", "Staff", "Customer" };
+        foreach (var name in roleNames)
+        {
+            if (!await db.Roles.AnyAsync(r => r.RoleName == name))
+                db.Roles.Add(new Role { RoleName = name });
+        }
+        await db.SaveChangesAsync();
+
+        // ── Default Admin user ─────────────────────────────────────
+        var adminEmail = "admin@phonestore.vn";
+        if (!await db.Users.AnyAsync(u => u.Email == adminEmail))
+        {
+            var adminRole = await db.Roles.FirstAsync(r => r.RoleName == "Admin");
+            db.Users.Add(new User
+            {
+                FullName = "Admin PhoneStore",
+                Email = adminEmail,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin@123"),
+                PhoneNumber = "0900000000",
+                RoleID = adminRole.RoleID,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow,
+            });
+            await db.SaveChangesAsync();
+        }
+    }
+}
+

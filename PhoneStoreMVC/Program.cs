@@ -34,6 +34,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 builder.Services.AddScoped<JwtService>();
 
+// ── Payment services ──────────────────────────────────────────────────────────
+builder.Services.AddScoped<VnPayService>();
+builder.Services.AddHttpClient("momo");
+builder.Services.AddScoped<MoMoService>();
+
 // ── CORS ──────────────────────────────────────────────────────────────────────
 var allowedOrigins = (builder.Configuration["Cors:AllowedOrigins"] ?? "")
     .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
@@ -63,6 +68,18 @@ builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
+// ── Seed database ─────────────────────────────────────────────────────────────
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    try { await DbSeeder.SeedAsync(db); }
+    catch (Exception ex)
+    {
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        logger.LogWarning(ex, "Database seeding failed (DB may not be available yet).");
+    }
+}
+
 // ── Pipeline ──────────────────────────────────────────────────────────────────
 if (app.Environment.IsDevelopment())
 {
@@ -71,7 +88,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("FrontendPolicy");
 
-// Serve static files from wwwroot (frontend)
+// Serve static files from wwwroot (frontend + uploaded images)
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
