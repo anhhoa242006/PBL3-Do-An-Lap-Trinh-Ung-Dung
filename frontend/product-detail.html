@@ -335,9 +335,17 @@
   }
 
   document.addEventListener('DOMContentLoaded', async () => {
-    if (typeof loadCatalog === 'function') {
-      await loadCatalog();
+    const catalogResult = typeof loadCatalog === 'function'
+      ? await loadCatalog()
+      : { success: false, error: 'Không thể tải dữ liệu catalog.' };
+
+    if (!catalogResult.success) {
+      const notFoundMsg = document.querySelector('#product-not-found p');
+      if (notFoundMsg) {
+        notFoundMsg.textContent = catalogResult.error || 'Không thể tải dữ liệu từ API.';
+      }
     }
+
     const id = getProductId();
     const product = getProductById(id);
 

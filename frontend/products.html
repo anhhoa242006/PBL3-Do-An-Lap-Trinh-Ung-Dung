@@ -270,9 +270,16 @@
   }
 
   document.addEventListener('DOMContentLoaded', async () => {
-    if (typeof loadCatalog === 'function') {
-      await loadCatalog();
+    const catalogResult = typeof loadCatalog === 'function'
+      ? await loadCatalog()
+      : { success: false, error: 'Không thể tải dữ liệu catalog.' };
+
+    if (!catalogResult.success) {
+      document.getElementById('products-count').innerHTML = `
+        <span style="color:#d0021b">${catalogResult.error || 'Không thể tải dữ liệu từ API.'}</span>
+      `;
     }
+
     const { cat, brand } = getParams();
 
     // Set breadcrumb

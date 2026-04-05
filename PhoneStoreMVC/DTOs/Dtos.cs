@@ -79,6 +79,34 @@ public class CategoryDto
     public string Icon { get; set; } = "✨";
 }
 
+public class BannerDto
+{
+    public int Id { get; set; }
+    public string? Title { get; set; }
+    public string? ImageUrl { get; set; }
+    public string? LinkUrl { get; set; }
+    public int DisplayOrder { get; set; }
+    public bool IsActive { get; set; }
+}
+
+public class CreateBannerRequest
+{
+    public string? Title { get; set; }
+    public string? ImageUrl { get; set; }
+    public string? LinkUrl { get; set; }
+    public int DisplayOrder { get; set; } = 0;
+    public bool IsActive { get; set; } = true;
+}
+
+public class UpdateBannerRequest
+{
+    public string? Title { get; set; }
+    public string? ImageUrl { get; set; }
+    public string? LinkUrl { get; set; }
+    public int? DisplayOrder { get; set; }
+    public bool? IsActive { get; set; }
+}
+
 public class CartItemRequest
 {
     public int VariantId { get; set; }

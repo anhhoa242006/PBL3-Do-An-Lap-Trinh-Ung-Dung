@@ -173,36 +173,12 @@
       await loadCatalog();
     }
 
-    const user = Auth.getCurrentUser();
     const accessEl = document.getElementById('admin-access');
     const contentEl = document.getElementById('admin-content');
     const adminUserEl = document.getElementById('admin-user');
 
-    if (!user) {
-      accessEl.innerHTML = `
-        <div class="admin-access-card">
-          <div class="admin-access-icon">🔒</div>
-          <h3>Bạn cần đăng nhập để truy cập trang quản trị</h3>
-          <a href="auth.html?redirect=admin.html" class="btn btn-primary">Đăng nhập ngay</a>
-        </div>
-      `;
-      return;
-    }
-
-    const isAdmin = ['Admin', 'Staff'].includes(user.role);
-    adminUserEl.textContent = `${user.fullName} · ${user.role || 'User'}`;
-
-    if (!isAdmin) {
-      accessEl.innerHTML = `
-        <div class="admin-access-card">
-          <div class="admin-access-icon">⚠️</div>
-          <h3>Tài khoản của bạn không có quyền quản trị</h3>
-          <p>Vui lòng liên hệ quản trị viên để được cấp quyền.</p>
-        </div>
-      `;
-      return;
-    }
-
+    // Bỏ qua kiểm tra đăng nhập - luôn hiển thị admin
+    adminUserEl.textContent = 'Quản trị viên';
     accessEl.style.display = 'none';
     contentEl.style.display = '';
 

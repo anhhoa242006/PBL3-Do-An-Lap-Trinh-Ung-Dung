@@ -80,59 +80,7 @@
 <main>
   <!-- HERO CAROUSEL -->
   <section class="hero-section">
-    <div class="hero-carousel">
-      <!-- Slide 1 -->
-      <div class="hero-slide hero-slide-1 active">
-        <div class="hero-content">
-          <div class="hero-badge">🔥 HOT 2025</div>
-          <h1 class="hero-title">iPhone 17 Pro Max<br>Titan Edition</h1>
-          <p class="hero-subtitle">Chip A19 Pro • Camera 48MP 3x • ProMotion OLED 6.9"</p>
-          <div class="hero-price-label">Chỉ từ</div>
-          <div class="hero-price">34.990.000₫</div>
-          <a href="product-detail.html?id=1" class="hero-cta">Mua ngay →</a>
-        </div>
-        <div class="hero-image">
-          <img src="https://placehold.co/260x260/1a1a2e/ffffff?text=iPhone+17+Pro" alt="iPhone 17 Pro Max">
-        </div>
-      </div>
-      <!-- Slide 2 -->
-      <div class="hero-slide hero-slide-2">
-        <div class="hero-content">
-          <div class="hero-badge">⚡ SIÊU SALE</div>
-          <h1 class="hero-title">Samsung Galaxy<br>S25 Ultra</h1>
-          <p class="hero-subtitle">Camera 200MP • S Pen • Snapdragon 8 Elite • Galaxy AI</p>
-          <div class="hero-price-label">Giảm đến</div>
-          <div class="hero-price">-5.000.000₫</div>
-          <a href="product-detail.html?id=2" class="hero-cta">Xem ngay →</a>
-        </div>
-        <div class="hero-image">
-          <img src="https://placehold.co/260x260/d0021b/ffffff?text=Galaxy+S25" alt="Samsung Galaxy S25 Ultra">
-        </div>
-      </div>
-      <!-- Slide 3 -->
-      <div class="hero-slide hero-slide-3">
-        <div class="hero-content">
-          <div class="hero-badge">🎉 MỚI NHẤT 2025</div>
-          <h1 class="hero-title">MacBook Air M4<br>Siêu mỏng siêu nhẹ</h1>
-          <p class="hero-subtitle">Chip M4 • 16GB RAM • Pin 18h • Màu mới Sky Blue</p>
-          <div class="hero-price-label">Giá từ</div>
-          <div class="hero-price">28.990.000₫</div>
-          <a href="product-detail.html?id=25" class="hero-cta">Khám phá →</a>
-        </div>
-        <div class="hero-image">
-          <img src="https://placehold.co/260x260/0a3d62/ffffff?text=MacBook+Air+M4" alt="MacBook Air M4">
-        </div>
-      </div>
-
-      <!-- Controls -->
-      <button class="carousel-arrow carousel-prev">‹</button>
-      <button class="carousel-arrow carousel-next">›</button>
-      <div class="carousel-controls">
-        <button class="carousel-dot active" data-index="0"></button>
-        <button class="carousel-dot" data-index="1"></button>
-        <button class="carousel-dot" data-index="2"></button>
-      </div>
-    </div>
+    <div class="hero-carousel" id="hero-carousel"></div>
   </section>
 
   <!-- CATEGORIES -->
@@ -148,26 +96,7 @@
 
   <!-- PROMO BANNERS -->
   <div class="container">
-    <div class="promo-grid">
-      <div class="promo-banner promo-banner-1" onclick="location.href='products.html?cat=dien-thoai'">
-        <div>
-          <div class="promo-badge">📱 ĐẶC BIỆT</div>
-          <div class="promo-title">iPhone 17 Series</div>
-          <div class="promo-desc">Ưu đãi lên đến 15%<br>cho dòng iPhone 17 mới nhất</div>
-          <div class="promo-cta">Mua ngay</div>
-        </div>
-        <img src="https://placehold.co/120x120/0f3460/ffffff?text=iPhone+17" alt="iPhone 17" style="border-radius:12px;opacity:.9">
-      </div>
-      <div class="promo-banner promo-banner-2" onclick="location.href='products.html?cat=phu-kien'">
-        <div>
-          <div class="promo-badge">🎧 PHỤ KIỆN</div>
-          <div class="promo-title">Phụ kiện Hot 2025</div>
-          <div class="promo-desc">Sony WH-1000XM6, AirPods 4, Buds3 Pro<br>Giảm đến 25%</div>
-          <div class="promo-cta">Xem ngay</div>
-        </div>
-        <img src="https://placehold.co/120x120/a80016/ffffff?text=AirPods+4" alt="AirPods 4" style="border-radius:12px;opacity:.9">
-      </div>
-    </div>
+    <div class="promo-grid" id="promo-grid"></div>
   </div>
 
   <!-- FEATURED PRODUCTS -->
@@ -274,40 +203,144 @@
 <script src="js/auth.js"></script>
 <script src="js/main.js"></script>
 <script>
-  document.addEventListener('DOMContentLoaded', async () => {
-    if (typeof loadCatalog === 'function') {
-      await loadCatalog();
+  function escapeHtml(value) {
+    return String(value || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/\"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function renderStateMessage(targetId, message) {
+    const el = document.getElementById(targetId);
+    if (!el) return;
+    el.innerHTML = `
+      <div style="grid-column:1/-1;text-align:center;padding:28px 12px;color:#666;background:#fff;border:1px solid #eee;border-radius:12px;">
+        ${escapeHtml(message)}
+      </div>
+    `;
+  }
+
+  function renderHero(items) {
+    const heroEl = document.getElementById('hero-carousel');
+    if (!heroEl) return;
+
+    if (!items.length) {
+      heroEl.innerHTML = `
+        <div class="hero-slide active">
+          <div class="hero-content">
+            <div class="hero-badge">📡 Dữ liệu</div>
+            <h1 class="hero-title">Chưa có banner hoặc sản phẩm</h1>
+            <p class="hero-subtitle">Vui lòng thêm dữ liệu trong database để hiển thị trang chủ.</p>
+            <a href="products.html" class="hero-cta">Xem sản phẩm →</a>
+          </div>
+        </div>
+      `;
+      return;
     }
 
-    const heroSlides = document.querySelectorAll('.hero-slide');
-    const heroProducts = getFeaturedProducts().slice(0, heroSlides.length);
-    heroSlides.forEach((slide, idx) => {
-      const product = heroProducts[idx];
-      if (!product) return;
-      const titleEl = slide.querySelector('.hero-title');
-      const nameParts = product.name.split(' ');
-      titleEl.textContent = '';
-      if (nameParts.length > 1) {
-        const firstLine = nameParts.slice(0, 2).join(' ');
-        const secondLine = nameParts.slice(2).join(' ');
-        titleEl.append(firstLine);
-        if (secondLine) {
-          titleEl.appendChild(document.createElement('br'));
-          titleEl.append(secondLine);
-        }
-      } else {
-        titleEl.textContent = product.name;
-      }
-      const heroDesc = product.description || product.categoryName || '';
-      slide.querySelector('.hero-subtitle').textContent = heroDesc.slice(0, 80);
-      slide.querySelector('.hero-price').textContent = formatPrice(product.price);
-      slide.querySelector('.hero-cta').href = `product-detail.html?id=${product.id}`;
-      const img = slide.querySelector('.hero-image img');
-      if (img) {
-        img.src = product.image;
-        img.alt = product.name;
-      }
+    const slides = items.map((item, index) => `
+      <div class="hero-slide hero-slide-${index + 1} ${index === 0 ? 'active' : ''}">
+        <div class="hero-content">
+          <div class="hero-badge">${escapeHtml(item.badge || '🔥 Nổi bật')}</div>
+          <h1 class="hero-title">${escapeHtml(item.title || '')}</h1>
+          <p class="hero-subtitle">${escapeHtml(item.subtitle || '')}</p>
+          <div class="hero-price-label">${escapeHtml(item.priceLabel || 'Giá từ')}</div>
+          <div class="hero-price">${escapeHtml(item.priceText || 'Liên hệ')}</div>
+          <a href="${escapeHtml(item.link || 'products.html')}" class="hero-cta">${escapeHtml(item.cta || 'Xem ngay →')}</a>
+        </div>
+        <div class="hero-image">
+          <img src="${escapeHtml(item.image || '')}" alt="${escapeHtml(item.title || 'Banner')}" loading="lazy">
+        </div>
+      </div>
+    `).join('');
+
+    const dots = items.map((_, index) => `
+      <button class="carousel-dot ${index === 0 ? 'active' : ''}" data-index="${index}"></button>
+    `).join('');
+
+    heroEl.innerHTML = `
+      ${slides}
+      <button class="carousel-arrow carousel-prev">‹</button>
+      <button class="carousel-arrow carousel-next">›</button>
+      <div class="carousel-controls">${dots}</div>
+    `;
+
+    if (typeof initCarousel === 'function') {
+      initCarousel();
+    }
+  }
+
+  function renderPromo(items) {
+    const promoGrid = document.getElementById('promo-grid');
+    if (!promoGrid) return;
+
+    if (!items.length) {
+      promoGrid.innerHTML = '';
+      return;
+    }
+
+    promoGrid.innerHTML = items.map((item, index) => `
+      <div class="promo-banner promo-banner-${(index % 2) + 1}" onclick="location.href='${escapeHtml(item.link)}'">
+        <div>
+          <div class="promo-badge">${escapeHtml(item.badge)}</div>
+          <div class="promo-title">${escapeHtml(item.title)}</div>
+          <div class="promo-desc">${escapeHtml(item.description)}</div>
+          <div class="promo-cta">${escapeHtml(item.cta)}</div>
+        </div>
+        <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.title)}" style="border-radius:12px;opacity:.9" loading="lazy">
+      </div>
+    `).join('');
+  }
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    const catalogResult = typeof loadCatalog === 'function'
+      ? await loadCatalog()
+      : { success: false, error: 'Không tìm thấy hàm loadCatalog.' };
+    const bannerResult = typeof loadBanners === 'function'
+      ? await loadBanners()
+      : { success: false, banners: [] };
+
+    const featuredProducts = getFeaturedProducts().slice(0, 3);
+    const heroItems = featuredProducts.map((p, idx) => {
+      const banner = (bannerResult.banners || [])[idx];
+      return {
+        badge: p.discount > 0 ? `🔥 Giảm ${p.discount}%` : '⭐ Sản phẩm nổi bật',
+        title: (banner?.title || p.name || '').replace(/\s{2,}/g, ' ').trim(),
+        subtitle: (p.description || p.categoryName || 'Sản phẩm chính hãng tại PhoneStore').slice(0, 90),
+        priceLabel: 'Giá từ',
+        priceText: formatPrice(p.price),
+        link: banner?.linkUrl || `product-detail.html?id=${p.id}`,
+        cta: 'Mua ngay →',
+        image: banner?.imageUrl || p.image,
+      };
     });
+
+    renderHero(heroItems);
+
+    const promoItems = ((bannerResult.banners || []).slice(3, 5)).map((b, idx) => ({
+      badge: idx === 0 ? '🎁 Ưu đãi' : '⚡ Khuyến mãi',
+      title: b.title || 'Banner khuyến mãi',
+      description: 'Khám phá chương trình ưu đãi mới nhất từ PhoneStore.',
+      cta: 'Xem ngay',
+      link: b.linkUrl || 'products.html',
+      image: b.imageUrl || '',
+    }));
+
+    if (!promoItems.length) {
+      const topCategories = categories.slice(0, 2);
+      renderPromo(topCategories.map((c, idx) => ({
+        badge: idx === 0 ? '📦 Danh mục' : '🛍️ Nổi bật',
+        title: c.name,
+        description: `${c.count || 0} sản phẩm đang kinh doanh`,
+        cta: 'Xem danh mục',
+        link: `products.html?cat=${encodeURIComponent(c.id)}`,
+        image: `https://placehold.co/120x120/0f3460/ffffff?text=${encodeURIComponent(c.name || 'Category')}`,
+      })));
+    } else {
+      renderPromo(promoItems);
+    }
 
     // Render categories
     const catGrid = document.getElementById('category-grid');
@@ -353,6 +386,15 @@
         ${b}
       </a>
     `).join('');
+
+    if (!catalogResult.success) {
+      const message = catalogResult.error || 'Không thể tải dữ liệu từ database/API.';
+      renderStateMessage('category-grid', message);
+      renderStateMessage('featured-grid', message);
+      renderStateMessage('sale-grid', message);
+      renderStateMessage('accessories-grid', message);
+      document.getElementById('brands-list').innerHTML = `<div style="padding:12px;color:#666">${escapeHtml(message)}</div>`;
+    }
 
     // Countdown timer
     function updateCountdown() {

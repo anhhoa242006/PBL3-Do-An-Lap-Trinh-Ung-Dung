@@ -5,9 +5,58 @@
 const AUTH_KEY = 'phonestore_users';
 const SESSION_KEY = 'phonestore_current_user';
 const TOKEN_KEY = 'phonestore_token';
-const API_BASE = typeof window.getApiBase === 'function'
-  ? window.getApiBase()
-  : 'http://localhost:5000/api';
+const API_TIMEOUT_MS = 12000;
+const API_BASE = window.PHONESTORE_API_BASE
+  || (typeof window.getApiBase === 'function' ? window.getApiBase() : null)
+  || localStorage.getItem('phonestore_api_base')
+  || 'http://localhost:5000/api';
+
+async function requestJson(path, body) {
+  const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  const timeoutId = controller
+    ? setTimeout(() => controller.abort(), API_TIMEOUT_MS)
+    : null;
+
+  try {
+    const response = await fetch(`${API_BASE}${path}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      signal: controller ? controller.signal : undefined,
+    });
+
+    const rawText = await response.text();
+    let data = {};
+
+    if (rawText) {
+      try {
+        data = JSON.parse(rawText);
+      } catch {
+        data = { message: rawText };
+      }
+    }
+
+    if (!response.ok || !data.success) {
+      return {
+        success: false,
+        message: data.message || `Yêu cầu thất bại (${response.status}).`,
+      };
+    }
+
+    return data;
+  } catch (error) {
+    if (error?.name === 'AbortError') {
+      return { success: false, message: `Kết nối tới backend bị quá thời gian chờ (${API_BASE}).` };
+    }
+
+    return {
+      success: false,
+      message: `Không thể kết nối tới backend tại ${API_BASE}. Hãy kiểm tra backend đã chạy và CORS đã được bật.`,
+    };
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId);
+  }
+}
 
 const Auth = {
   getUsers() {
@@ -51,39 +100,23 @@ const Auth = {
   },
 
   async register(fullName, email, phone, password) {
-    try {
-      const response = await fetch(`${API_BASE}/auth/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fullName, email, phone, password }),
-      });
-      const data = await response.json();
-      if (!response.ok || !data.success) {
-        return { success: false, message: data.message || 'Đăng ký thất bại.' };
-      }
-      this.setCurrentUser(data.user, data.token);
-      return { success: true, user: data.user };
-    } catch (error) {
-      return { success: false, message: 'Không thể kết nối đến máy chủ.' };
+    const data = await requestJson('/auth/register', { fullName, email, phone, password });
+    if (!data.success) {
+      return data;
     }
+
+    this.setCurrentUser(data.user, data.token);
+    return { success: true, user: data.user };
   },
 
   async login(email, password) {
-    try {
-      const response = await fetch(`${API_BASE}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await response.json();
-      if (!response.ok || !data.success) {
-        return { success: false, message: data.message || 'Email hoặc mật khẩu không đúng.' };
-      }
-      this.setCurrentUser(data.user, data.token);
-      return { success: true, user: data.user };
-    } catch (error) {
-      return { success: false, message: 'Không thể kết nối đến máy chủ.' };
+    const data = await requestJson('/auth/login', { email, password });
+    if (!data.success) {
+      return data;
     }
+
+    this.setCurrentUser(data.user, data.token);
+    return { success: true, user: data.user };
   },
 
   logout() {

@@ -83,23 +83,39 @@ public static class DbSeeder
         }
         await db.SaveChangesAsync();
 
+        var roleMap = await db.Roles
+            .ToDictionaryAsync(r => r.RoleName, r => r.RoleID);
+
         // ── Default Admin user ─────────────────────────────────────
-        var adminEmail = "admin@phonestore.vn";
-        if (!await db.Users.AnyAsync(u => u.Email == adminEmail))
+        var seedUsers = new[]
         {
-            var adminRole = await db.Roles.FirstAsync(r => r.RoleName == "Admin");
+            new { Email = "admin@phonestore.vn", FullName = "Admin PhoneStore", Password = "Admin@123", Phone = "0900000000", RoleName = "Admin" },
+            new { Email = "staff@phonestore.vn", FullName = "Staff PhoneStore", Password = "Staff@123", Phone = "0900000001", RoleName = "Staff" },
+            new { Email = "customer@phonestore.vn", FullName = "Customer PhoneStore", Password = "Customer@123", Phone = "0900000002", RoleName = "Customer" },
+        };
+
+        foreach (var seed in seedUsers)
+        {
+            if (await db.Users.AnyAsync(u => u.Email == seed.Email))
+                continue;
+
+            var roleId = roleMap.TryGetValue(seed.RoleName, out var mappedRoleId)
+                ? mappedRoleId
+                : roleMap["Customer"];
+
             db.Users.Add(new User
             {
-                FullName = "Admin PhoneStore",
-                Email = adminEmail,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin@123"),
-                PhoneNumber = "0900000000",
-                RoleID = adminRole.RoleID,
+                FullName = seed.FullName,
+                Email = seed.Email,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(seed.Password),
+                PhoneNumber = seed.Phone,
+                RoleID = roleId,
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
             });
-            await db.SaveChangesAsync();
         }
+
+        await db.SaveChangesAsync();
     }
 }
 
