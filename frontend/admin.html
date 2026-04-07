@@ -63,26 +63,110 @@
   </nav>
 </header>
 
-<main>
+<main class="admin-page">
   <div class="container" style="padding:32px 0 60px">
     <div class="admin-header">
       <div>
         <h1 class="admin-title">Bảng điều khiển quản trị</h1>
-        <p class="admin-subtitle">Theo dõi nhanh dữ liệu cửa hàng từ database.</p>
+        <p class="admin-subtitle">Vận hành admin theo hướng frontend-first, sẵn sàng nối backend sau này.</p>
       </div>
-      <div class="admin-user" id="admin-user"></div>
+      <div class="admin-user" id="admin-user">Đang tải...</div>
     </div>
 
-    <div id="admin-access" class="admin-access"></div>
+    <div class="admin-meta-row">
+      <span class="admin-mode-badge mock" id="admin-mode-badge">Mock Data Mode</span>
+      <span class="admin-last-sync" id="admin-last-sync">Cập nhật lúc: --:--:--</span>
+      <button class="admin-btn admin-btn-ghost" id="admin-reset-data">Reset dữ liệu local</button>
+    </div>
 
-    <div id="admin-content" style="display:none">
+    <div class="admin-tabs" id="admin-tabs">
+      <button type="button" class="admin-tab active" data-tab="dashboard">Tổng quan</button>
+      <button type="button" class="admin-tab" data-tab="products">Sản phẩm</button>
+      <button type="button" class="admin-tab" data-tab="orders">Đơn hàng</button>
+      <button type="button" class="admin-tab" data-tab="users">Người dùng</button>
+      <button type="button" class="admin-tab" data-tab="banners">Banner</button>
+      <button type="button" class="admin-tab" data-tab="coupons">Coupons</button>
+      <button type="button" class="admin-tab" data-tab="reviews">Đánh giá</button>
+    </div>
+
+    <section class="admin-panel active" data-panel="dashboard">
       <div class="admin-summary" id="admin-summary"></div>
 
+      <div class="admin-grid-3">
+        <div class="admin-section">
+          <div class="admin-section-header">
+            <h2>Top thương hiệu</h2>
+          </div>
+          <div id="dashboard-top-brands"></div>
+        </div>
+        <div class="admin-section">
+          <div class="admin-section-header">
+            <h2>Trạng thái đơn hàng</h2>
+          </div>
+          <div id="dashboard-order-status"></div>
+        </div>
+        <div class="admin-section">
+          <div class="admin-section-header">
+            <h2>Sắp hết hàng</h2>
+          </div>
+          <div id="dashboard-low-stock"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="admin-panel" data-panel="products">
       <div class="admin-section">
         <div class="admin-section-header">
-          <h2>Danh sách sản phẩm</h2>
-          <span id="admin-product-count"></span>
+          <h2>Quản lý sản phẩm</h2>
+          <span id="products-total"></span>
         </div>
+
+        <div class="admin-toolbar">
+          <input id="products-search" class="admin-input" type="text" placeholder="Tìm theo tên, slug, brand...">
+          <select id="products-category-filter" class="admin-select"></select>
+          <select id="products-brand-filter" class="admin-select"></select>
+          <button type="button" class="admin-btn" id="product-form-toggle">+ Thêm sản phẩm</button>
+        </div>
+
+        <form id="product-form" class="admin-form hidden">
+          <input id="product-id" type="hidden">
+          <div class="admin-field">
+            <label for="product-name">Tên sản phẩm</label>
+            <input id="product-name" class="admin-input" type="text" required>
+          </div>
+          <div class="admin-field">
+            <label for="product-slug">Slug</label>
+            <input id="product-slug" class="admin-input" type="text" required>
+          </div>
+          <div class="admin-field">
+            <label for="product-brand">Thương hiệu</label>
+            <input id="product-brand" class="admin-input" type="text" required>
+          </div>
+          <div class="admin-field">
+            <label for="product-category-name">Danh mục</label>
+            <input id="product-category-name" class="admin-input" type="text" required>
+          </div>
+          <div class="admin-field">
+            <label for="product-price">Giá</label>
+            <input id="product-price" class="admin-input" type="number" min="0" required>
+          </div>
+          <div class="admin-field">
+            <label for="product-stock">Tồn kho</label>
+            <input id="product-stock" class="admin-input" type="number" min="0" required>
+          </div>
+          <div class="admin-field admin-field-full">
+            <label for="product-image">URL hình ảnh</label>
+            <input id="product-image" class="admin-input" type="text" placeholder="https://...">
+          </div>
+          <div class="admin-form-actions admin-field-full">
+            <label class="admin-check"><input id="product-active" type="checkbox" checked> Đang bán</label>
+            <div class="admin-row-actions">
+              <button type="button" class="admin-btn admin-btn-ghost" id="product-form-cancel">Hủy</button>
+              <button type="submit" class="admin-btn">Lưu sản phẩm</button>
+            </div>
+          </div>
+        </form>
+
         <div class="admin-table-wrapper">
           <table class="admin-table">
             <thead>
@@ -92,14 +176,258 @@
                 <th>Thương hiệu</th>
                 <th>Giá</th>
                 <th>Tồn kho</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
               </tr>
             </thead>
-            <tbody id="admin-products-body"></tbody>
+            <tbody id="products-body"></tbody>
           </table>
         </div>
+
+        <div class="admin-pagination" id="products-pagination"></div>
       </div>
-    </div>
+    </section>
+
+    <section class="admin-panel" data-panel="orders">
+      <div class="admin-section">
+        <div class="admin-section-header">
+          <h2>Quản lý đơn hàng</h2>
+          <span id="orders-total"></span>
+        </div>
+
+        <div class="admin-toolbar">
+          <input id="orders-search" class="admin-input" type="text" placeholder="Tìm theo mã đơn, tên khách, email...">
+          <select id="orders-status-filter" class="admin-select">
+            <option value="all">Tất cả trạng thái</option>
+            <option value="Pending">Chờ xử lý</option>
+            <option value="Confirmed">Đã xác nhận</option>
+            <option value="Shipping">Đang giao</option>
+            <option value="Delivered">Đã giao</option>
+            <option value="Cancelled">Đã hủy</option>
+          </select>
+        </div>
+
+        <div class="admin-table-wrapper">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>#ID</th>
+                <th>Khách hàng</th>
+                <th>Ngày đặt</th>
+                <th>Tổng tiền</th>
+                <th>Thanh toán</th>
+                <th>SP</th>
+                <th>Trạng thái</th>
+                <th>Cập nhật</th>
+              </tr>
+            </thead>
+            <tbody id="orders-body"></tbody>
+          </table>
+        </div>
+
+        <div class="admin-pagination" id="orders-pagination"></div>
+      </div>
+    </section>
+
+    <section class="admin-panel" data-panel="users">
+      <div class="admin-section">
+        <div class="admin-section-header">
+          <h2>Người dùng</h2>
+          <span id="users-total"></span>
+        </div>
+
+        <div class="admin-toolbar">
+          <input id="users-search" class="admin-input" type="text" placeholder="Tìm theo tên, email, số điện thoại...">
+        </div>
+
+        <div class="admin-table-wrapper">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Họ tên</th>
+                <th>Email</th>
+                <th>Số điện thoại</th>
+                <th>Vai trò</th>
+                <th>Trạng thái</th>
+                <th>Ngày tạo</th>
+              </tr>
+            </thead>
+            <tbody id="users-body"></tbody>
+          </table>
+        </div>
+
+        <div class="admin-pagination" id="users-pagination"></div>
+      </div>
+    </section>
+
+    <section class="admin-panel" data-panel="banners">
+      <div class="admin-section">
+        <div class="admin-section-header">
+          <h2>Banner</h2>
+          <span id="banners-total"></span>
+        </div>
+
+        <div class="admin-toolbar">
+          <input id="banners-search" class="admin-input" type="text" placeholder="Tìm theo tiêu đề hoặc link...">
+          <button type="button" class="admin-btn" id="banner-form-toggle">+ Thêm banner</button>
+        </div>
+
+        <form id="banner-form" class="admin-form hidden">
+          <input id="banner-id" type="hidden">
+          <div class="admin-field">
+            <label for="banner-title">Tiêu đề</label>
+            <input id="banner-title" class="admin-input" type="text" required>
+          </div>
+          <div class="admin-field">
+            <label for="banner-image">URL ảnh</label>
+            <input id="banner-image" class="admin-input" type="text" required>
+          </div>
+          <div class="admin-field">
+            <label for="banner-link">Link điều hướng</label>
+            <input id="banner-link" class="admin-input" type="text" required>
+          </div>
+          <div class="admin-field">
+            <label for="banner-order">Thứ tự hiển thị</label>
+            <input id="banner-order" class="admin-input" type="number" min="0" value="0">
+          </div>
+          <div class="admin-form-actions admin-field-full">
+            <label class="admin-check"><input id="banner-active" type="checkbox" checked> Hiển thị</label>
+            <div class="admin-row-actions">
+              <button type="button" class="admin-btn admin-btn-ghost" id="banner-form-cancel">Hủy</button>
+              <button type="submit" class="admin-btn">Lưu banner</button>
+            </div>
+          </div>
+        </form>
+
+        <div class="admin-table-wrapper">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Tiêu đề</th>
+                <th>Ảnh</th>
+                <th>Link</th>
+                <th>Thứ tự</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="banners-body"></tbody>
+          </table>
+        </div>
+
+        <div class="admin-pagination" id="banners-pagination"></div>
+      </div>
+    </section>
+
+    <section class="admin-panel" data-panel="coupons">
+      <div class="admin-section">
+        <div class="admin-section-header">
+          <h2>Mã giảm giá</h2>
+          <span id="coupons-total"></span>
+        </div>
+
+        <div class="admin-toolbar">
+          <input id="coupons-search" class="admin-input" type="text" placeholder="Tìm theo mã hoặc mô tả...">
+          <button type="button" class="admin-btn" id="coupon-form-toggle">+ Thêm coupon</button>
+        </div>
+
+        <form id="coupon-form" class="admin-form hidden">
+          <input id="coupon-id" type="hidden">
+          <div class="admin-field">
+            <label for="coupon-code">Mã</label>
+            <input id="coupon-code" class="admin-input" type="text" required>
+          </div>
+          <div class="admin-field">
+            <label for="coupon-description">Mô tả</label>
+            <input id="coupon-description" class="admin-input" type="text">
+          </div>
+          <div class="admin-field">
+            <label for="coupon-type">Loại</label>
+            <select id="coupon-type" class="admin-select">
+              <option value="percent">Theo phần trăm</option>
+              <option value="amount">Theo số tiền</option>
+            </select>
+          </div>
+          <div class="admin-field">
+            <label for="coupon-value">Giá trị</label>
+            <input id="coupon-value" class="admin-input" type="number" min="0" required>
+          </div>
+          <div class="admin-field">
+            <label for="coupon-start">Ngày bắt đầu</label>
+            <input id="coupon-start" class="admin-input" type="date">
+          </div>
+          <div class="admin-field">
+            <label for="coupon-end">Ngày kết thúc</label>
+            <input id="coupon-end" class="admin-input" type="date">
+          </div>
+          <div class="admin-form-actions admin-field-full">
+            <label class="admin-check"><input id="coupon-active" type="checkbox" checked> Kích hoạt</label>
+            <div class="admin-row-actions">
+              <button type="button" class="admin-btn admin-btn-ghost" id="coupon-form-cancel">Hủy</button>
+              <button type="submit" class="admin-btn">Lưu coupon</button>
+            </div>
+          </div>
+        </form>
+
+        <div class="admin-table-wrapper">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Mã</th>
+                <th>Mô tả</th>
+                <th>Loại</th>
+                <th>Giá trị</th>
+                <th>Thời gian</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="coupons-body"></tbody>
+          </table>
+        </div>
+
+        <div class="admin-pagination" id="coupons-pagination"></div>
+      </div>
+    </section>
+
+    <section class="admin-panel" data-panel="reviews">
+      <div class="admin-section">
+        <div class="admin-section-header">
+          <h2>Đánh giá sản phẩm</h2>
+          <span id="reviews-total"></span>
+        </div>
+
+        <div class="admin-toolbar">
+          <input id="reviews-search" class="admin-input" type="text" placeholder="Tìm theo người dùng, sản phẩm, nội dung...">
+          <select id="reviews-status-filter" class="admin-select">
+            <option value="all">Tất cả</option>
+            <option value="pending">Chờ duyệt</option>
+          </select>
+        </div>
+
+        <div class="admin-table-wrapper">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Sản phẩm</th>
+                <th>Người đánh giá</th>
+                <th>Số sao</th>
+                <th>Nội dung</th>
+                <th>Trạng thái</th>
+                <th>Ngày tạo</th>
+                <th>Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="reviews-body"></tbody>
+          </table>
+        </div>
+
+        <div class="admin-pagination" id="reviews-pagination"></div>
+      </div>
+    </section>
   </div>
+
+  <div id="admin-toast" class="admin-toast"></div>
 </main>
 
 <footer class="footer">
@@ -112,202 +440,7 @@
 <script src="js/cart.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/main.js"></script>
-<script>
-  function formatStock(variants) {
-    return variants.reduce((sum, v) => sum + (v.stock || 0), 0);
-  }
-
-  function formatPrice(n) {
-    if (!n && n !== 0) return '—';
-    return Number(n).toLocaleString('vi-VN') + '₫';
-  }
-
-  async function loadAdminStats() {
-    try {
-      const res = await fetch(`${PHONESTORE_API_BASE}/admin/stats`, {
-        headers: Auth.getAuthHeaders(),
-      });
-      if (!res.ok) return null;
-      return await res.json();
-    } catch { return null; }
-  }
-
-  async function loadAdminOrders() {
-    try {
-      const res = await fetch(`${PHONESTORE_API_BASE}/admin/orders?pageSize=10`, {
-        headers: Auth.getAuthHeaders(),
-      });
-      if (!res.ok) return null;
-      return await res.json();
-    } catch { return null; }
-  }
-
-  const STATUS_LABELS = {
-    Pending:   { label: 'Chờ xử lý',    color: '#f59e0b' },
-    Confirmed: { label: 'Đã xác nhận',   color: '#3b82f6' },
-    Shipping:  { label: 'Đang giao',      color: '#8b5cf6' },
-    Delivered: { label: 'Đã giao',        color: '#10b981' },
-    Cancelled: { label: 'Đã hủy',         color: '#ef4444' },
-  };
-
-  async function updateOrderStatus(orderId, selectEl) {
-    const status = selectEl.value;
-    try {
-      const res = await fetch(`${PHONESTORE_API_BASE}/admin/orders/${orderId}/status`, {
-        method: 'PATCH',
-        headers: Auth.getAuthHeaders(),
-        body: JSON.stringify({ status }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        Cart.showToast?.(`Cập nhật đơn hàng #${orderId} thành công!`) ||
-          alert(`Cập nhật thành công!`);
-      }
-    } catch (e) {
-      alert('Lỗi cập nhật trạng thái: ' + e.message);
-    }
-  }
-
-  document.addEventListener('DOMContentLoaded', async () => {
-    if (typeof loadCatalog === 'function') {
-      await loadCatalog();
-    }
-
-    const accessEl = document.getElementById('admin-access');
-    const contentEl = document.getElementById('admin-content');
-    const adminUserEl = document.getElementById('admin-user');
-
-    // Bỏ qua kiểm tra đăng nhập - luôn hiển thị admin
-    adminUserEl.textContent = 'Quản trị viên';
-    accessEl.style.display = 'none';
-    contentEl.style.display = '';
-
-    // Load stats from API
-    const [stats, ordersData] = await Promise.all([loadAdminStats(), loadAdminOrders()]);
-
-    if (stats) {
-      document.getElementById('admin-summary').innerHTML = `
-        <div class="admin-card">
-          <div class="admin-card-label">Sản phẩm</div>
-          <div class="admin-card-value">${stats.totalProducts}</div>
-        </div>
-        <div class="admin-card">
-          <div class="admin-card-label">Đơn hàng</div>
-          <div class="admin-card-value">${stats.totalOrders}</div>
-        </div>
-        <div class="admin-card">
-          <div class="admin-card-label">Khách hàng</div>
-          <div class="admin-card-value">${stats.totalUsers}</div>
-        </div>
-        <div class="admin-card">
-          <div class="admin-card-label">Doanh thu</div>
-          <div class="admin-card-value" style="font-size:18px">${formatPrice(stats.totalRevenue)}</div>
-        </div>
-        <div class="admin-card">
-          <div class="admin-card-label">Chờ xử lý</div>
-          <div class="admin-card-value" style="color:#f59e0b">${stats.pendingOrders}</div>
-        </div>
-        <div class="admin-card">
-          <div class="admin-card-label">Sắp hết hàng</div>
-          <div class="admin-card-value" style="color:#ef4444">${stats.lowStockVariants}</div>
-        </div>
-      `;
-    } else {
-      // Fallback to catalog data
-      const totalProducts = products.length;
-      const totalCategories = categories.length;
-      const totalBrands = brands.length;
-      const totalStock = products.reduce((sum, p) => sum + formatStock(p.variants || []), 0);
-      document.getElementById('admin-summary').innerHTML = `
-        <div class="admin-card">
-          <div class="admin-card-label">Sản phẩm</div>
-          <div class="admin-card-value">${totalProducts}</div>
-        </div>
-        <div class="admin-card">
-          <div class="admin-card-label">Danh mục</div>
-          <div class="admin-card-value">${totalCategories}</div>
-        </div>
-        <div class="admin-card">
-          <div class="admin-card-label">Thương hiệu</div>
-          <div class="admin-card-value">${totalBrands}</div>
-        </div>
-        <div class="admin-card">
-          <div class="admin-card-label">Tổng tồn kho</div>
-          <div class="admin-card-value">${totalStock}</div>
-        </div>
-      `;
-    }
-
-    // Render orders table if available
-    if (ordersData && ordersData.orders && ordersData.orders.length > 0) {
-      const ordersSection = document.createElement('div');
-      ordersSection.className = 'admin-section';
-      ordersSection.innerHTML = `
-        <div class="admin-section-header">
-          <h2>Đơn hàng gần đây</h2>
-          <span>${ordersData.total} đơn hàng</span>
-        </div>
-        <div class="admin-table-wrapper">
-          <table class="admin-table">
-            <thead>
-              <tr>
-                <th>#ID</th>
-                <th>Khách hàng</th>
-                <th>Ngày đặt</th>
-                <th>Tổng tiền</th>
-                <th>Thanh toán</th>
-                <th>Trạng thái</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${ordersData.orders.map(o => {
-                const st = STATUS_LABELS[o.status] || { label: o.status, color: '#666' };
-                return `
-                  <tr>
-                    <td>#${o.orderId}</td>
-                    <td>${o.customerName || o.customerEmail || 'Khách'}</td>
-                    <td>${new Date(o.orderDate).toLocaleDateString('vi-VN')}</td>
-                    <td>${formatPrice(o.totalAmount)}</td>
-                    <td>${o.paymentMethod || 'COD'}</td>
-                    <td>
-                      <select onchange="updateOrderStatus(${o.orderId}, this)"
-                        style="border:1px solid ${st.color};color:${st.color};border-radius:4px;padding:2px 6px;font-size:12px;cursor:pointer">
-                        ${['Pending','Confirmed','Shipping','Delivered','Cancelled'].map(s =>
-                          `<option value="${s}" ${s === o.status ? 'selected' : ''}>${STATUS_LABELS[s]?.label || s}</option>`
-                        ).join('')}
-                      </select>
-                    </td>
-                  </tr>
-                `;
-              }).join('')}
-            </tbody>
-          </table>
-        </div>
-      `;
-      contentEl.querySelector('.admin-section')?.before(ordersSection);
-    }
-
-    const rows = products.map(product => `
-      <tr>
-        <td>
-          <div class="admin-product">
-            <img src="${product.image}" alt="${product.name}" loading="lazy">
-            <div>
-              <div class="admin-product-name">${product.name}</div>
-              <div class="admin-product-meta">${product.slug || ''}</div>
-            </div>
-          </div>
-        </td>
-        <td>${product.categoryName || product.category}</td>
-        <td>${product.brand}</td>
-        <td>${formatPrice(product.price)}</td>
-        <td>${formatStock(product.variants || [])}</td>
-      </tr>
-    `).join('');
-
-    document.getElementById('admin-product-count').textContent = `Tổng: ${products.length} sản phẩm`;
-    document.getElementById('admin-products-body').innerHTML = rows;
-  });
-</script>
+<script src="js/admin-store.js"></script>
+<script src="js/admin.js"></script>
 </body>
 </html>

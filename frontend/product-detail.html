@@ -98,6 +98,8 @@
         <div class="product-gallery">
           <div class="gallery-main">
             <img id="gallery-main-img" src="" alt="">
+            <button type="button" class="gallery-nav gallery-nav-prev" id="gallery-prev-btn" aria-label="Ảnh trước">❮</button>
+            <button type="button" class="gallery-nav gallery-nav-next" id="gallery-next-btn" aria-label="Ảnh sau">❯</button>
           </div>
           <div class="gallery-thumbs" id="gallery-thumbs"></div>
         </div>
@@ -265,31 +267,231 @@
 <script>
   let currentProduct = null;
   let selectedVariant = null;
+  let selectedColor = '';
+  let selectedStorage = '';
+  let galleryImages = [];
+  let currentGalleryIndex = 0;
 
   function getProductId() {
     return new URLSearchParams(window.location.search).get('id');
   }
 
+  function uniqueImages(items = []) {
+    const seen = new Set();
+    return items.filter((img) => {
+      if (!img || seen.has(img)) return false;
+      seen.add(img);
+      return true;
+    });
+  }
+
+  function getGalleryImages(preferredImage = '') {
+    const productImages = Array.isArray(currentProduct?.images) ? currentProduct.images : [];
+    const variantImages = (currentProduct?.variants || []).map(v => v.image).filter(Boolean);
+    const merged = uniqueImages([...productImages, ...variantImages, currentProduct?.image].filter(Boolean));
+
+    if (!preferredImage) return merged;
+    return uniqueImages([preferredImage, ...merged]);
+  }
+
+  function updateMainImageByIndex(index) {
+    const mainImg = document.getElementById('gallery-main-img');
+    if (!mainImg || !galleryImages.length) return;
+
+    currentGalleryIndex = (index + galleryImages.length) % galleryImages.length;
+    const activeImage = galleryImages[currentGalleryIndex];
+    mainImg.src = activeImage;
+    mainImg.alt = `${currentProduct.name} ảnh ${currentGalleryIndex + 1}`;
+
+    document.querySelectorAll('.gallery-thumb').forEach((thumb, i) => {
+      thumb.classList.toggle('active', i === currentGalleryIndex);
+    });
+  }
+
+  function renderGallery(preferredImage = '') {
+    const thumbsContainer = document.getElementById('gallery-thumbs');
+    if (!thumbsContainer) return;
+
+    galleryImages = getGalleryImages(preferredImage);
+    if (!galleryImages.length) {
+      galleryImages = [currentProduct.image || ''];
+    }
+
+    thumbsContainer.innerHTML = galleryImages.map((img, i) => `
+      <button type="button" class="gallery-thumb" data-index="${i}" aria-label="Ảnh ${i + 1}">
+        <img src="${img}" alt="${currentProduct.name} ảnh ${i + 1}" loading="lazy">
+      </button>
+    `).join('');
+
+    thumbsContainer.querySelectorAll('.gallery-thumb').forEach((thumb) => {
+      thumb.addEventListener('click', () => {
+        const index = Number(thumb.dataset.index || 0);
+        updateMainImageByIndex(index);
+      });
+    });
+
+    const prevBtn = document.getElementById('gallery-prev-btn');
+    const nextBtn = document.getElementById('gallery-next-btn');
+    const shouldShowNav = galleryImages.length > 1;
+
+    if (prevBtn) prevBtn.style.display = shouldShowNav ? 'flex' : 'none';
+    if (nextBtn) nextBtn.style.display = shouldShowNav ? 'flex' : 'none';
+
+    const preferredIndex = preferredImage ? galleryImages.indexOf(preferredImage) : 0;
+    updateMainImageByIndex(preferredIndex >= 0 ? preferredIndex : 0);
+  }
+
+  function goToPreviousImage() {
+    updateMainImageByIndex(currentGalleryIndex - 1);
+  }
+
+  function goToNextImage() {
+    updateMainImageByIndex(currentGalleryIndex + 1);
+  }
+
+  function getVariantBySelection(lastChanged = '') {
+    const variants = currentProduct?.variants || [];
+    if (!variants.length) {
+      return {
+        color: selectedColor || '',
+        storage: selectedStorage || '',
+        price: currentProduct?.price || 0,
+        originalPrice: currentProduct?.originalPrice || currentProduct?.price || 0,
+        stock: 0,
+        image: currentProduct?.image || '',
+      };
+    }
+
+    if (selectedColor && selectedStorage) {
+      const exactVariant = variants.find(v => v.color === selectedColor && v.storage === selectedStorage);
+      if (exactVariant) return exactVariant;
+    }
+
+    const colorVariant = selectedColor ? variants.find(v => v.color === selectedColor) : null;
+    const storageVariant = selectedStorage ? variants.find(v => v.storage === selectedStorage) : null;
+    const defaultVariant = variants.find(v => v.isDefault) || variants[0];
+
+    let baseVariant = defaultVariant;
+    if (lastChanged === 'color') {
+      baseVariant = colorVariant || storageVariant || defaultVariant;
+    } else if (lastChanged === 'storage') {
+      baseVariant = storageVariant || colorVariant || defaultVariant;
+    } else {
+      baseVariant = colorVariant || storageVariant || defaultVariant;
+    }
+
+    return {
+      ...baseVariant,
+      color: selectedColor || baseVariant.color || '',
+      storage: selectedStorage || baseVariant.storage || '',
+      price: storageVariant?.price ?? baseVariant.price ?? currentProduct.price,
+      originalPrice: storageVariant?.originalPrice ?? baseVariant.originalPrice ?? currentProduct.originalPrice ?? currentProduct.price,
+      stock: baseVariant.stock ?? 0,
+      image: colorVariant?.image || baseVariant.image || currentProduct.image,
+    };
+  }
+
+  function onColorSelect(color) {
+    selectedColor = color;
+    selectVariant(getVariantBySelection('color'));
+  }
+
+  function onStorageSelect(storage) {
+    selectedStorage = storage;
+    selectVariant(getVariantBySelection('storage'));
+  }
+
+  function renderVariantOptions(product) {
+    const colors = [...new Set(product.variants.map(v => v.color).filter(Boolean))];
+    const storages = [...new Set(product.variants.map(v => v.storage).filter(Boolean))];
+
+    const colorSection = document.getElementById('color-section');
+    const storageSection = document.getElementById('storage-section');
+    const colorOptions = document.getElementById('color-options');
+    const storageOptions = document.getElementById('storage-options');
+
+    if (colors.length) {
+      colorSection.style.display = '';
+      if (!selectedColor || !colors.includes(selectedColor)) selectedColor = colors[0];
+      colorOptions.innerHTML = colors.map(c => `
+        <button type="button" class="variant-btn color-variant-btn" data-color="${c}">
+          ${c}
+        </button>
+      `).join('');
+
+      colorOptions.querySelectorAll('.color-variant-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          onColorSelect(btn.dataset.color || '');
+        });
+      });
+    } else {
+      colorSection.style.display = 'none';
+      selectedColor = '';
+    }
+
+    if (storages.length) {
+      storageSection.style.display = '';
+      if (!selectedStorage || !storages.includes(selectedStorage)) selectedStorage = storages[0];
+      storageOptions.innerHTML = storages.map(s => `
+        <button type="button" class="variant-btn storage-variant-btn" data-storage="${s}">
+          ${s}
+        </button>
+      `).join('');
+
+      storageOptions.querySelectorAll('.storage-variant-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          onStorageSelect(btn.dataset.storage || '');
+        });
+      });
+    } else {
+      storageSection.style.display = 'none';
+      selectedStorage = '';
+    }
+  }
+
   function selectVariant(variant) {
     selectedVariant = variant;
-    document.getElementById('selected-color').textContent = variant.color || '—';
-    document.getElementById('selected-storage').textContent = variant.storage || '—';
+    const resolvedColor = selectedColor || variant.color || '';
+    const resolvedStorage = selectedStorage || variant.storage || '';
+
+    document.getElementById('selected-color').textContent = resolvedColor || '—';
+    document.getElementById('selected-storage').textContent = resolvedStorage || '—';
+
+    selectedColor = resolvedColor;
+    selectedStorage = resolvedStorage;
 
     // Update price
-    if (variant.price) {
-      document.getElementById('detail-price').textContent = formatPrice(variant.price);
-      const saved = currentProduct.originalPrice - variant.price;
-      if (saved > 0) {
-        document.getElementById('detail-saving').textContent = `Tiết kiệm ${formatPrice(saved)}`;
-      }
+    const variantPrice = Number(variant.price ?? currentProduct.price ?? 0);
+    const variantOriginalPriceRaw = Number(variant.originalPrice ?? currentProduct.originalPrice ?? variantPrice);
+    const variantOriginalPrice = variantOriginalPriceRaw >= variantPrice ? variantOriginalPriceRaw : variantPrice;
+    const variantDiscount = variantOriginalPrice > variantPrice
+      ? Math.round((1 - variantPrice / variantOriginalPrice) * 100)
+      : 0;
+
+    document.getElementById('detail-price').textContent = formatPrice(variantPrice);
+    document.getElementById('detail-original-price').textContent = variantOriginalPrice > variantPrice
+      ? formatPrice(variantOriginalPrice)
+      : '';
+    document.getElementById('detail-discount').textContent = variantDiscount > 0
+      ? `-${variantDiscount}%`
+      : '';
+
+    const saved = variantOriginalPrice - variantPrice;
+    document.getElementById('detail-saving').textContent = saved > 0
+      ? `Tiết kiệm ${formatPrice(saved)}`
+      : '';
+
+    const variantImage = variant.image || currentProduct.image;
+    if (variantImage) {
+      renderGallery(variantImage);
     }
 
     // Highlight active buttons
     document.querySelectorAll('.color-variant-btn').forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.color === variant.color);
+      btn.classList.toggle('active', btn.dataset.color === selectedColor);
     });
     document.querySelectorAll('.storage-variant-btn').forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.storage === variant.storage);
+      btn.classList.toggle('active', btn.dataset.storage === selectedStorage);
     });
   }
 
@@ -368,17 +570,8 @@
     }
     document.getElementById('breadcrumb-name').textContent = product.name;
 
-    // Gallery
-    const mainImg = document.getElementById('gallery-main-img');
-    mainImg.src = product.images[0] || product.image;
-    mainImg.alt = product.name;
-
-    const thumbsContainer = document.getElementById('gallery-thumbs');
-    thumbsContainer.innerHTML = product.images.map((img, i) => `
-      <div class="gallery-thumb ${i === 0 ? 'active' : ''}" onclick="switchMainImg(this, '${img}')">
-        <img src="${img}" alt="${product.name} ảnh ${i+1}" loading="lazy">
-      </div>
-    `).join('');
+    document.getElementById('gallery-prev-btn')?.addEventListener('click', goToPreviousImage);
+    document.getElementById('gallery-next-btn')?.addEventListener('click', goToNextImage);
 
     // Product info
     document.getElementById('detail-brand').textContent = product.brand;
@@ -392,38 +585,16 @@
       document.getElementById('detail-original-price').textContent = formatPrice(product.originalPrice);
       document.getElementById('detail-discount').textContent = `-${product.discount}%`;
       document.getElementById('detail-saving').textContent = `Tiết kiệm ${formatPrice(product.originalPrice - product.price)}`;
-    }
-
-    // Variants
-    const colors = [...new Set(product.variants.map(v => v.color).filter(Boolean))];
-    const storages = [...new Set(product.variants.map(v => v.storage).filter(Boolean))];
-
-    if (colors.length) {
-      document.getElementById('color-options').innerHTML = colors.map(c => `
-        <button class="variant-btn color-variant-btn ${c === colors[0] ? 'active' : ''}"
-          data-color="${c}" onclick="onColorSelect('${c}')">
-          ${c}
-        </button>
-      `).join('');
-      document.getElementById('selected-color').textContent = colors[0];
     } else {
-      document.getElementById('color-section').style.display = 'none';
+      document.getElementById('detail-original-price').textContent = '';
+      document.getElementById('detail-discount').textContent = '';
+      document.getElementById('detail-saving').textContent = '';
     }
 
-    if (storages.length) {
-      document.getElementById('storage-options').innerHTML = storages.map(s => `
-        <button class="variant-btn storage-variant-btn ${s === storages[0] ? 'active' : ''}"
-          data-storage="${s}" onclick="onStorageSelect('${s}')">
-          ${s}
-        </button>
-      `).join('');
-      document.getElementById('selected-storage').textContent = storages[0];
-    } else {
-      document.getElementById('storage-section').style.display = 'none';
-    }
-
-    // Set default variant
-    selectedVariant = product.variants[0] || { color: colors[0] || '', storage: storages[0] || '', price: product.price };
+    // Variants + gallery
+    renderVariantOptions(product);
+    const initialVariant = getVariantBySelection();
+    selectVariant(initialVariant);
 
     // Quantity
     const qtyInput = document.getElementById('qty-input');
@@ -474,28 +645,6 @@
     const related = getRelatedProducts(product);
     document.getElementById('related-grid').innerHTML = related.map(renderProductCard).join('');
   });
-
-  function switchMainImg(thumbEl, imgSrc) {
-    document.querySelectorAll('.gallery-thumb').forEach(t => t.classList.remove('active'));
-    thumbEl.classList.add('active');
-    document.getElementById('gallery-main-img').src = imgSrc;
-  }
-
-  function onColorSelect(color) {
-    const storageSelected = document.querySelector('.storage-variant-btn.active')?.dataset.storage || '';
-    const variant = currentProduct.variants.find(v => v.color === color && (!storageSelected || v.storage === storageSelected))
-      || currentProduct.variants.find(v => v.color === color)
-      || currentProduct.variants[0];
-    selectVariant(variant);
-  }
-
-  function onStorageSelect(storage) {
-    const colorSelected = document.querySelector('.color-variant-btn.active')?.dataset.color || '';
-    const variant = currentProduct.variants.find(v => v.storage === storage && (!colorSelected || v.color === colorSelected))
-      || currentProduct.variants.find(v => v.storage === storage)
-      || currentProduct.variants[0];
-    selectVariant(variant);
-  }
 </script>
 </body>
 </html>

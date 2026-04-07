@@ -30,7 +30,6 @@ VALUES
 ('Xiaomi','xiaomi'),
 ('Oppo','oppo'),
 ('Sony','sony'),
-('Nokia','nokia'),
 ('Infinix','infinix'),
 ('Realme', 'realme'),
 ('Huawei','huawei'),
@@ -44,9 +43,7 @@ VALUES
 ('HP','hp'),
 ('ACER', 'acer'),
 ('LG','lg'),
-('MSI', 'msi'),
-('TOSHIBA', 'toshiba'),
-('AQUA','AQUA');
+('MSI', 'msi');
 
 
 INSERT INTO Roles (RoleName)
