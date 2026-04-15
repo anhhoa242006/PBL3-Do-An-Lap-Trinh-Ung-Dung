@@ -1,124 +1,183 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using PhoneStoreMVC.Data;
+using PhoneStoreMVC.BLL.Services;
 using PhoneStoreMVC.DTOs;
-using PhoneStoreMVC.Services;
+using PhoneStoreMVC.ViewModels;
 
 namespace PhoneStoreMVC.Controllers;
 
 [ApiController]
+[Route("api/account")]
 [Route("api/auth")]
 public class AuthController : ControllerBase
 {
-    private readonly ApplicationDbContext _db;
-    private readonly JwtService _jwtService;
+    private readonly IAccountService _accountService;
 
-    public AuthController(ApplicationDbContext db, JwtService jwtService)
+    public AuthController(IAccountService accountService)
     {
-        _db = db;
-        _jwtService = jwtService;
+        _accountService = accountService;
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginRequest request)
+    public async Task<IActionResult> Login([FromBody] LoginVM model)
     {
-        if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
-            return BadRequest(new { success = false, message = "Vui lòng nhập email và mật khẩu." });
+        var result = await _accountService.LoginAsync(model);
+        if (!result.Success || result.Data == null)
+            return Unauthorized(new AuthResponse { Success = false, Message = result.Message });
 
-        var user = await _db.Users
-            .Include(u => u.Role)
-            .FirstOrDefaultAsync(u => u.Email == request.Email.Trim().ToLower());
-
-        if (user == null || !user.IsActive)
-            return Unauthorized(new { success = false, message = "Email hoặc mật khẩu không đúng." });
-
-        bool isValid;
-        if (user.PasswordHash.StartsWith("$2"))
-        {
-            isValid = BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash);
-        }
-        else
-        {
-            // Legacy plain-text passwords – verify then upgrade
-            isValid = request.Password == user.PasswordHash;
-            if (isValid)
-            {
-                user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
-                await _db.SaveChangesAsync();
-            }
-        }
-
-        if (!isValid)
-            return Unauthorized(new { success = false, message = "Email hoặc mật khẩu không đúng." });
-
-        var token = _jwtService.GenerateToken(user);
-
-        return Ok(new AuthResponse
-        {
-            Success = true,
-            Token = token,
-            User = new UserDto
-            {
-                Id = user.UserID,
-                FullName = user.FullName ?? "",
-                Email = user.Email,
-                Phone = user.PhoneNumber,
-                Role = user.Role?.RoleName,
-            },
-        });
+        await SignInAsync(result.Data);
+        return Ok(new AuthResponse { Success = true, User = result.Data });
     }
 
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterRequest request)
+    public async Task<IActionResult> Register([FromBody] RegisterVM model)
     {
-        if (string.IsNullOrWhiteSpace(request.FullName) ||
-            string.IsNullOrWhiteSpace(request.Email) ||
-            string.IsNullOrWhiteSpace(request.Phone) ||
-            string.IsNullOrWhiteSpace(request.Password))
-            return BadRequest(new { success = false, message = "Vui lòng điền đầy đủ thông tin." });
+        var result = await _accountService.RegisterAsync(model);
+        if (!result.Success || result.Data == null)
+            return BadRequest(new AuthResponse { Success = false, Message = result.Message });
 
-        var email = request.Email.Trim().ToLower();
+        await SignInAsync(result.Data);
+        return StatusCode(201, new AuthResponse { Success = true, User = result.Data });
+    }
 
-        var existing = await _db.Users.AnyAsync(u => u.Email == email);
-        if (existing)
-            return Conflict(new { success = false, message = "Email này đã được sử dụng." });
+    [Authorize]
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout()
+    {
+        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        return Ok(new { success = true, message = "Đăng xuất thành công." });
+    }
 
-        var customerRole = await _db.Roles.FirstOrDefaultAsync(r => r.RoleName == "Customer");
-        var roleId = customerRole?.RoleID ?? 3;
+    [Authorize]
+    [HttpGet("logout")]
+    public async Task<IActionResult> LogoutGet()
+    {
+        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        return Ok(new { success = true, message = "Đăng xuất thành công." });
+    }
 
-        var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
+    [Authorize]
+    [HttpGet("profile")]
+    public async Task<IActionResult> GetProfile()
+    {
+        var userId = GetUserId();
+        if (userId == 0) return Unauthorized();
 
-        var user = new Models.User
+        var profile = await _accountService.GetProfileAsync(userId);
+        if (profile == null) return NotFound(new { success = false, message = "Không tìm thấy tài khoản." });
+
+        return Ok(new { success = true, data = profile });
+    }
+
+    [Authorize]
+    [HttpPut("profile")]
+    public async Task<IActionResult> UpdateProfile([FromBody] ProfileVM model)
+    {
+        var userId = GetUserId();
+        if (userId == 0) return Unauthorized();
+
+        var result = await _accountService.UpdateProfileAsync(userId, model);
+        if (!result.Success) return BadRequest(new { success = false, message = result.Message });
+
+        var profile = await _accountService.GetProfileAsync(userId);
+        return Ok(new { success = true, message = result.Message, data = profile });
+    }
+
+    [Authorize]
+    [HttpPost("change-password")]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordVM model)
+    {
+        var userId = GetUserId();
+        if (userId == 0) return Unauthorized();
+
+        var result = await _accountService.ChangePasswordAsync(userId, model);
+        if (!result.Success) return BadRequest(new { success = false, message = result.Message });
+
+        return Ok(new { success = true, message = result.Message });
+    }
+
+    [Authorize]
+    [HttpGet("addresses")]
+    public async Task<IActionResult> GetAddresses()
+    {
+        var userId = GetUserId();
+        if (userId == 0) return Unauthorized();
+
+        var addresses = await _accountService.GetAddressesAsync(userId);
+        return Ok(new { success = true, data = addresses });
+    }
+
+    [Authorize]
+    [HttpPost("addresses")]
+    public async Task<IActionResult> AddAddress([FromBody] AddressVM model)
+    {
+        var userId = GetUserId();
+        if (userId == 0) return Unauthorized();
+
+        var result = await _accountService.AddAddressAsync(userId, model);
+        if (!result.Success || result.Data == null)
+            return BadRequest(new { success = false, message = result.Message });
+
+        return StatusCode(201, new { success = true, data = result.Data });
+    }
+
+    [Authorize]
+    [HttpPut("addresses/{addressId:int}")]
+    public async Task<IActionResult> UpdateAddress(int addressId, [FromBody] AddressVM model)
+    {
+        var userId = GetUserId();
+        if (userId == 0) return Unauthorized();
+
+        var result = await _accountService.UpdateAddressAsync(userId, addressId, model);
+        if (!result.Success || result.Data == null)
+            return BadRequest(new { success = false, message = result.Message });
+
+        return Ok(new { success = true, data = result.Data });
+    }
+
+    [Authorize]
+    [HttpDelete("addresses/{addressId:int}")]
+    public async Task<IActionResult> DeleteAddress(int addressId)
+    {
+        var userId = GetUserId();
+        if (userId == 0) return Unauthorized();
+
+        var result = await _accountService.DeleteAddressAsync(userId, addressId);
+        if (!result.Success)
+            return BadRequest(new { success = false, message = result.Message });
+
+        return Ok(new { success = true, message = result.Message });
+    }
+
+    private int GetUserId()
+    {
+        var claim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        return int.TryParse(claim, out var id) ? id : 0;
+    }
+
+    private async Task SignInAsync(UserDto user)
+    {
+        var claims = new List<Claim>
         {
-            FullName = request.FullName.Trim(),
-            Email = email,
-            PasswordHash = passwordHash,
-            PhoneNumber = request.Phone.Trim(),
-            RoleID = roleId,
-            IsActive = true,
-            CreatedAt = DateTime.UtcNow,
+            new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new(ClaimTypes.Name, user.FullName),
+            new(ClaimTypes.Email, user.Email),
+            new(ClaimTypes.Role, user.Role ?? "Customer"),
         };
 
-        _db.Users.Add(user);
-        await _db.SaveChangesAsync();
+        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+        var principal = new ClaimsPrincipal(identity);
 
-        // Reload with role
-        await _db.Entry(user).Reference(u => u.Role).LoadAsync();
-
-        var token = _jwtService.GenerateToken(user);
-
-        return StatusCode(201, new AuthResponse
-        {
-            Success = true,
-            Token = token,
-            User = new UserDto
+        await HttpContext.SignInAsync(
+            CookieAuthenticationDefaults.AuthenticationScheme,
+            principal,
+            new AuthenticationProperties
             {
-                Id = user.UserID,
-                FullName = user.FullName ?? "",
-                Email = user.Email,
-                Phone = user.PhoneNumber,
-                Role = user.Role?.RoleName ?? "Customer",
-            },
-        });
+                IsPersistent = true,
+                ExpiresUtc = DateTimeOffset.UtcNow.AddDays(7),
+            });
     }
 }

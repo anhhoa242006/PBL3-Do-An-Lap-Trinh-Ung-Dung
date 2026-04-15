@@ -1,8 +1,8 @@
-using System.Text;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
+using PhoneStoreMVC.BLL.Services;
 using PhoneStoreMVC.Data;
+using PhoneStoreMVC.DAL.Repositories;
 using PhoneStoreMVC.Services;
 
 static bool IsLocalDevelopmentOrigin(string origin)
@@ -27,28 +27,30 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// ── JWT Auth ──────────────────────────────────────────────────────────────────
-var jwtSection = builder.Configuration.GetSection("Jwt");
-var secretKey = jwtSection["SecretKey"] ?? "PhoneStore_DefaultSecretKey_2025_PBL3_Project";
-var key = Encoding.UTF8.GetBytes(secretKey);
-
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
+// ── Cookie Auth ───────────────────────────────────────────────────────────────
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
     {
-        options.TokenValidationParameters = new TokenValidationParameters
+        options.Cookie.Name = "PhoneStore.Auth";
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SameSite = SameSiteMode.Lax;
+        options.SlidingExpiration = true;
+        options.ExpireTimeSpan = TimeSpan.FromDays(7);
+        options.Events.OnRedirectToLogin = context =>
         {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = jwtSection["Issuer"] ?? "PhoneStoreMVC",
-            ValidAudience = jwtSection["Audience"] ?? "PhoneStoreFrontend",
-            IssuerSigningKey = new SymmetricSecurityKey(key),
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            return Task.CompletedTask;
+        };
+        options.Events.OnRedirectToAccessDenied = context =>
+        {
+            context.Response.StatusCode = StatusCodes.Status403Forbidden;
+            return Task.CompletedTask;
         };
     });
 
 builder.Services.AddAuthorization();
-builder.Services.AddScoped<JwtService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IAccountService, AccountService>();
 
 // ── Payment services ──────────────────────────────────────────────────────────
 builder.Services.AddScoped<VnPayService>();
@@ -65,15 +67,18 @@ builder.Services.AddCors(options =>
     {
         if (builder.Environment.IsDevelopment())
         {
-            policy.SetIsOriginAllowed(IsLocalDevelopmentOrigin);
+            policy.SetIsOriginAllowed(IsLocalDevelopmentOrigin)
+                  .AllowCredentials();
         }
         else if (allowedOrigins.Length > 0)
         {
-            policy.WithOrigins(allowedOrigins);
+            policy.WithOrigins(allowedOrigins)
+                  .AllowCredentials();
         }
         else
         {
-            policy.AllowAnyOrigin();
+            policy.SetIsOriginAllowed(_ => true)
+                  .AllowCredentials();
         }
 
         policy.AllowAnyHeader()
@@ -125,4 +130,3 @@ app.MapControllers();
 app.MapGet("/api/health", () => new { status = "ok", timestamp = DateTime.UtcNow });
 
 app.Run();
-

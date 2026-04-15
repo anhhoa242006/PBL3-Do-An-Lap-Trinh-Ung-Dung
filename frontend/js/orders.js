@@ -198,11 +198,11 @@ function showTracking(orderId) {
 }
 
 // ---- API order helpers ----
-async function loadOrdersFromApi(token) {
+async function loadOrdersFromApi() {
   try {
     const res = await fetch(`${PHONESTORE_API_BASE}/orders`, {
+      credentials: 'include',
       headers: {
-        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
     });
@@ -253,7 +253,6 @@ async function loadOrdersFromApi(token) {
 // ---- Page init ----
 document.addEventListener('DOMContentLoaded', async () => {
   const user = Auth.getCurrentUser();
-  const token = Auth.getToken();
   const loginPrompt = document.getElementById('orders-login-prompt');
   const ordersSection = document.getElementById('orders-section');
   const ordersList = document.getElementById('orders-list');
@@ -270,8 +269,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   let userOrders = [];
 
   // Try loading from API first
-  if (token && typeof PHONESTORE_API_BASE !== 'undefined') {
-    const apiOrders = await loadOrdersFromApi(token);
+  if (typeof PHONESTORE_API_BASE !== 'undefined') {
+    const apiOrders = await loadOrdersFromApi();
     if (apiOrders && apiOrders.length > 0) {
       userOrders = apiOrders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     }

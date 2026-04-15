@@ -1054,7 +1054,10 @@ function getCategoryIcon(value) {
 }
 
 async function fetchJson(path, options = {}) {
-  const response = await fetch(`${PHONESTORE_API_BASE}${path}`, options);
+  const response = await fetch(`${PHONESTORE_API_BASE}${path}`, {
+    credentials: 'include',
+    ...options,
+  });
   if (!response.ok) {
     let detail = '';
     try {
