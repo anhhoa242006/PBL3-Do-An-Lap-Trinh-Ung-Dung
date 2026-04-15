@@ -77,8 +77,7 @@ builder.Services.AddCors(options =>
         }
         else
         {
-            policy.SetIsOriginAllowed(_ => true)
-                  .AllowCredentials();
+            policy.AllowAnyOrigin();
         }
 
         policy.AllowAnyHeader()

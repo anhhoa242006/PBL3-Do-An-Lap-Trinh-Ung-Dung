@@ -52,14 +52,6 @@ public class AuthController : ControllerBase
     }
 
     [Authorize]
-    [HttpGet("logout")]
-    public async Task<IActionResult> LogoutGet()
-    {
-        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-        return Ok(new { success = true, message = "Đăng xuất thành công." });
-    }
-
-    [Authorize]
     [HttpGet("profile")]
     public async Task<IActionResult> GetProfile()
     {

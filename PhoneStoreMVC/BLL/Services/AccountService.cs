@@ -7,6 +7,7 @@ namespace PhoneStoreMVC.BLL.Services;
 
 public class AccountService : IAccountService
 {
+    private const string BcryptPrefix = "$2";
     private readonly IUserRepository _userRepository;
 
     public AccountService(IUserRepository userRepository)
@@ -184,7 +185,7 @@ public class AccountService : IAccountService
 
     private async Task<bool> VerifyAndUpgradePassword(User user, string password)
     {
-        if (user.PasswordHash.StartsWith("$2"))
+        if (user.PasswordHash.StartsWith(BcryptPrefix))
             return BCrypt.Net.BCrypt.Verify(password, user.PasswordHash);
 
         var valid = password == user.PasswordHash;
