@@ -162,6 +162,7 @@ function updateAuthUI() {
         adminLink.href = 'admin.html';
         adminLink.className = 'header-btn admin-link';
         adminLink.title = 'Trang quản trị cửa hàng';
+        adminLink.setAttribute('aria-label', 'Trang quản trị cửa hàng');
         adminLink.textContent = '⚙️ Quản trị';
         menu.appendChild(adminLink);
       }

@@ -31,7 +31,7 @@ public class ChangePasswordVM
 
 public class AddressVM
 {
-    public int AddressId { get; set; }
+    public int AddressID { get; set; }
     public string? AddressLine { get; set; }
     public string? City { get; set; }
     public string? District { get; set; }
