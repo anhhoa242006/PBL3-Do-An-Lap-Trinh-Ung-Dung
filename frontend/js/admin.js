@@ -3,6 +3,15 @@
 // =====================
 
 (function initAdminPage() {
+  const currentUser = window.Auth && typeof window.Auth.getCurrentUser === 'function'
+    ? window.Auth.getCurrentUser()
+    : null;
+  const canAccessAdmin = currentUser && ['Admin', 'Staff'].includes(currentUser.role);
+  if (!canAccessAdmin) {
+    window.location.href = 'auth.html?redirect=admin.html';
+    return;
+  }
+
   const PAGE_SIZE = 8;
   const STATUS_META = {
     Pending: { label: 'Chờ xử lý', className: 'pending' },

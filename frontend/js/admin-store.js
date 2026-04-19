@@ -645,6 +645,7 @@
 
         const response = await fetch(`${base}${path}`, {
           ...options,
+          credentials: 'include',
           headers,
         });
 

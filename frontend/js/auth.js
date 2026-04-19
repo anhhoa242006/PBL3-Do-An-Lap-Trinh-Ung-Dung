@@ -22,6 +22,7 @@ async function requestJson(path, body) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
+      credentials: 'include',
       signal: controller ? controller.signal : undefined,
     });
 
@@ -95,8 +96,7 @@ const Auth = {
   },
 
   getAuthHeaders() {
-    const token = this.getToken();
-    return token ? { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+    return { 'Content-Type': 'application/json' };
   },
 
   async register(fullName, email, phone, password) {
@@ -119,7 +119,15 @@ const Auth = {
     return { success: true, user: data.user };
   },
 
-  logout() {
+  async logout() {
+    try {
+      await fetch(`${API_BASE}/auth/logout`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+    } catch {
+      // ignore network errors and still clear local session
+    }
     this.setCurrentUser(null);
   },
 
@@ -153,8 +161,9 @@ function updateAuthUI() {
         adminLink = document.createElement('a');
         adminLink.href = 'admin.html';
         adminLink.className = 'header-btn admin-link';
-        adminLink.title = 'Quản trị';
-        adminLink.textContent = '⚙️';
+        adminLink.title = 'Trang quản trị cửa hàng';
+        adminLink.setAttribute('aria-label', 'Trang quản trị cửa hàng');
+        adminLink.textContent = '⚙️ Quản trị';
         menu.appendChild(adminLink);
       }
       adminLink.style.display = isAdmin ? '' : 'none';
